@@ -2,12 +2,16 @@ import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 import { Alert, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { useSavedAffirmations } from '@/app/context/SavedAffirmationContext';
+import type { AffirmationCategory } from '@/app/types/affirmations';
 import { Text } from '@/components/ui/text';
+import HeartButton from './HeartButton';
 
 type AffirmationsCardProps = {
+  id: string;
   affirmation: string;
   style?: StyleProp<ViewStyle>;
-  category: string;
+  category: AffirmationCategory | string;
 };
 
 type ActionButtonProps = {
@@ -31,10 +35,14 @@ function ActionButton({ accessibilityLabel, icon, onPress }: ActionButtonProps) 
 
 
 export function AffirmationsCard({
+  id,
   affirmation,
   style,
   category,
 }: AffirmationsCardProps) {
+  const { isSaved, toggleSaved } = useSavedAffirmations();
+  const saved = isSaved(id);
+
   return (
     <View style={[styles.card, style]}>
       <View style={styles.content}>
@@ -43,10 +51,13 @@ export function AffirmationsCard({
 
       <View style={styles.actions}>
         <ActionButton accessibilityLabel="Dislike affirmation" icon="close" onPress={() => Alert.alert('Skipped', 'We can show another affirmation next.')} />
-        <ActionButton accessibilityLabel="Like affirmation" icon="heart" onPress={() => Alert.alert('Saved', 'This affirmation feels like a keeper.')} />
+
+        <HeartButton
+          saved={saved}
+          onPress={() => toggleSaved({ id, text: affirmation, category })}
+        />
       </View>
     </View>
-
   );
 }
 

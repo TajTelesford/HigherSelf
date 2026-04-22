@@ -1,5 +1,5 @@
-import { FlatList, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { AffirmationsCard } from '@/components/AffirmationsCard';
+import { FlatList, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { AFFIRMATIONS } from '../data/affirmation';
 
 export default function HomeScreen() {
@@ -24,6 +24,7 @@ export default function HomeScreen() {
         pagingEnabled
         renderItem={({ item }) => (
           <AffirmationsCard
+            id={item.id}
             affirmation={item.text}
             category={item.category}
             style={[styles.card, { height }]}
