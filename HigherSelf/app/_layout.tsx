@@ -1,6 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import '../global.css';
 
@@ -36,13 +35,44 @@ export default function RootLayout() {
   return (
     <SavedAffirmationsProvider>
       <ThemeProvider value={theme}>
-        <Stack>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
           <Stack.Screen
-            name="(tabs)"
-            options={{ headerShown: false, contentStyle: { backgroundColor: '#0B0F1A' } }}
+            name="modals/themes"
+            options={{
+              presentation: 'transparentModal',
+              animation: 'slide_from_bottom',
+            }}
+          />
+          <Stack.Screen
+            name="modals/profile"
+            options={{
+              presentation: 'transparentModal',
+              animation: 'slide_from_bottom',
+            }}
+          />
+          <Stack.Screen
+            name="modals/explore"
+            options={{
+              presentation: 'transparentModal',
+              animation: 'slide_from_bottom',
+            }}
+          />
+          <Stack.Screen
+            name="modals/mood"
+            options={{
+              presentation: 'transparentModal',
+              animation: 'slide_from_bottom',
+            }}
+          />
+          <Stack.Screen
+            name="modals/practiceAffirmations"
+            options={{
+              presentation: 'transparentModal',
+              animation: 'slide_from_bottom',
+            }}
           />
         </Stack>
-        <StatusBar style="light" backgroundColor="#0B0F1A" />
       </ThemeProvider>
     </SavedAffirmationsProvider>
   );

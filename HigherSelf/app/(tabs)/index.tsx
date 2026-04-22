@@ -1,4 +1,5 @@
 import { AffirmationsCard } from '@/components/AffirmationsCard';
+import FloatingActionButtons from '@/components/FloatingActionButtons';
 import { FlatList, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { AFFIRMATIONS } from '../data/affirmation';
 
@@ -33,6 +34,8 @@ export default function HomeScreen() {
         snapToAlignment="start"
         showsVerticalScrollIndicator={false}
       />
+
+      <FloatingActionButtons />
     </View>
   );
 }
