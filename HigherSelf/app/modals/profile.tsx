@@ -186,9 +186,9 @@ const styles = StyleSheet.create({
     minHeight: 132,
     borderRadius: 26,
     backgroundColor: 'rgba(216, 157, 185, 0.92)',
-    marginBottom: 18,
-    paddingHorizontal: 18,
-    paddingVertical: 18,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   upgradeCardPressed: {
     opacity: 0.96,
@@ -197,13 +197,13 @@ const styles = StyleSheet.create({
   upgradeContentRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(216, 157, 185, 0.92)',
+    backgroundColor: 'transparent',
     borderRadius: 26,
     padding: 15,
   },
   upgradeTextWrap: {
     flex: 1,
-    paddingRight: 12,
+    paddingRight: 20,
     justifyContent: 'center',
   },
   upgradeTitle: {
@@ -249,43 +249,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  tile: {
-    width: '48%',
-    height: 200,
-    borderRadius: 28,
-    backgroundColor: '#28375f',
-    paddingHorizontal: 18,
-    paddingVertical: 18,
-    justifyContent: 'space-between',
-  },
-  tilePressed: {
-    opacity: 0.94,
-    transform: [{ scale: 0.988 }],
-  },
-  tileArt: {
-    height: 142,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    marginBottom: 10,
-  },
-  tileSparkleOne: {
-    position: 'absolute',
-    top: 14,
-    left: 14,
-  },
-  tileSparkleTwo: {
-    position: 'absolute',
-    top: 30,
-    right: 18,
-  },
-  tileTitle: {
-    color: '#F2E9E4',
-    fontSize:20,
-    fontWeight: '400',
-    lineHeight: 0,
-    position: 'absolute',
-    bottom: 18,
-    left: 18,
-  },
+
+
+
 });
