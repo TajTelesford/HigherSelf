@@ -1,6 +1,8 @@
+import { ProfileCardTile } from '@/components/ProfileCardTile';
 import UserStreak from '@/components/UserStreak';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import React from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -43,32 +45,7 @@ const PROFILE_CARD_ROWS = PROFILE_CARDS.reduce<ProfileCard[][]>((rows, card, ind
   return rows;
 }, []);
 
-function ProfileCardTile({ title, icon, onPress }: ProfileCard) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
-    >
-      <View style={styles.tileArt}>
-        <MaterialCommunityIcons color="#F2E9E4" name={icon} size={78} />
-        <Ionicons
-          name="sparkles"
-          size={12}
-          color="rgba(242, 233, 228, 0.92)"
-          style={styles.tileSparkleOne}
-        />
-        <Ionicons
-          name="sparkles"
-          size={9}
-          color="rgba(242, 233, 228, 0.68)"
-          style={styles.tileSparkleTwo}
-        />
-      </View>
 
-      <Text style={styles.tileTitle}>{title}</Text>
-    </Pressable>
-  );
-}
 
 export default function ProfileScreen() {
   return (
@@ -100,7 +77,7 @@ export default function ProfileScreen() {
 
           <Pressable
             onPress={() => Alert.alert('Unlock all', 'Premium upgrade flow is coming next.')}
-            style={({ pressed }) => [styles.upgradeCard, pressed && styles.upgradeCardPressed]}
+            style={styles.upgradeCard}
           >
             <View style={styles.upgradeContentRow}>
               <View style={styles.upgradeTextWrap}>
@@ -274,9 +251,9 @@ const styles = StyleSheet.create({
   },
   tile: {
     width: '48%',
-    height: 230,
+    height: 200,
     borderRadius: 28,
-    backgroundColor: '#6A5857',
+    backgroundColor: '#28375f',
     paddingHorizontal: 18,
     paddingVertical: 18,
     justifyContent: 'space-between',
@@ -304,8 +281,11 @@ const styles = StyleSheet.create({
   },
   tileTitle: {
     color: '#F2E9E4',
-    fontSize: 20,
-    fontWeight: '500',
-    lineHeight: 28,
+    fontSize:20,
+    fontWeight: '400',
+    lineHeight: 0,
+    position: 'absolute',
+    bottom: 18,
+    left: 18,
   },
 });
