@@ -33,6 +33,16 @@ const PROFILE_CARDS: ProfileCard[] = [
   },
 ];
 
+const PROFILE_CARD_ROWS = PROFILE_CARDS.reduce<ProfileCard[][]>((rows, card, index) => {
+  if (index % 2 === 0) {
+    rows.push([card]);
+  } else {
+    rows[rows.length - 1].push(card);
+  }
+
+  return rows;
+}, []);
+
 function ProfileCardTile({ title, icon, onPress }: ProfileCard) {
   return (
     <Pressable
@@ -40,17 +50,17 @@ function ProfileCardTile({ title, icon, onPress }: ProfileCard) {
       style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
     >
       <View style={styles.tileArt}>
-        <MaterialCommunityIcons color="#F5F7FA" name={icon} size={58} />
+        <MaterialCommunityIcons color="#F2E9E4" name={icon} size={78} />
         <Ionicons
           name="sparkles"
           size={12}
-          color="rgba(245, 247, 250, 0.78)"
+          color="rgba(242, 233, 228, 0.92)"
           style={styles.tileSparkleOne}
         />
         <Ionicons
           name="sparkles"
           size={9}
-          color="rgba(245, 247, 250, 0.5)"
+          color="rgba(242, 233, 228, 0.68)"
           style={styles.tileSparkleTwo}
         />
       </View>
@@ -127,8 +137,12 @@ export default function ProfileScreen() {
           <Text style={styles.sectionTitle}>Customize the app</Text>
 
           <View style={styles.grid}>
-            {PROFILE_CARDS.map((card) => (
-              <ProfileCardTile key={card.title} {...card} />
+            {PROFILE_CARD_ROWS.map((row, index) => (
+              <View key={`profile-row-${index}`} style={styles.gridRow}>
+                {row.map((card) => (
+                  <ProfileCardTile key={card.title} {...card} />
+                ))}
+              </View>
             ))}
           </View>
         </ScrollView>
@@ -252,19 +266,18 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   grid: {
+    gap: 16,
+  },
+  gridRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    rowGap: 18,
   },
   tile: {
     width: '48%',
-    minHeight: 220,
-    borderRadius: 24,
-    backgroundColor: 'rgba(27, 34, 51, 0.92)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-    paddingHorizontal: 16,
+    height: 230,
+    borderRadius: 28,
+    backgroundColor: '#6A5857',
+    paddingHorizontal: 18,
     paddingVertical: 18,
     justifyContent: 'space-between',
   },
@@ -273,28 +286,26 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.988 }],
   },
   tileArt: {
-    height: 128,
-    borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    height: 142,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    marginBottom: 16,
+    marginBottom: 10,
   },
   tileSparkleOne: {
     position: 'absolute',
-    top: 18,
-    left: 18,
+    top: 14,
+    left: 14,
   },
   tileSparkleTwo: {
     position: 'absolute',
-    top: 34,
-    right: 20,
+    top: 30,
+    right: 18,
   },
   tileTitle: {
-    color: '#F5F7FA',
-    fontSize: 19,
-    fontWeight: '600',
-    lineHeight: 26,
+    color: '#F2E9E4',
+    fontSize: 20,
+    fontWeight: '500',
+    lineHeight: 28,
   },
 });
