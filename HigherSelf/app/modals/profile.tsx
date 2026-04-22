@@ -1,4 +1,5 @@
 import { ProfileCardTile } from '@/components/ProfileCardTile';
+import { UnlockAllCardSection } from '@/components/UnlockAllCardSection';
 import UserStreak from '@/components/UserStreak';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -75,39 +76,7 @@ export default function ProfileScreen() {
         >
           <Text style={styles.title}>Profile</Text>
 
-          <Pressable
-            onPress={() => Alert.alert('Unlock all', 'Premium upgrade flow is coming next.')}
-            style={styles.upgradeCard}
-          >
-            <View style={styles.upgradeContentRow}>
-              <View style={styles.upgradeTextWrap}>
-                <Text style={styles.upgradeTitle}>Unlock all</Text>
-                <Text style={styles.upgradeBody}>
-                  Access all topics, affirmations, themes, and remove ads!
-                </Text>
-              </View>
-
-              <View style={styles.upgradeArtWrap}>
-                <MaterialCommunityIcons
-                  name="diamond-stone"
-                  size={54}
-                  color="rgba(220, 112, 234, 0.72)"
-                />
-                <Ionicons
-                  name="sparkles"
-                  size={14}
-                  color="rgba(31, 24, 32, 0.65)"
-                  style={styles.upgradeSparkleTop}
-                />
-                <Ionicons
-                  name="sparkles"
-                  size={10}
-                  color="rgba(31, 24, 32, 0.55)"
-                  style={styles.upgradeSparkleBottom}
-                />
-              </View>
-            </View>
-          </Pressable>
+          <UnlockAllCardSection text='Access all topics, affirmations, themes, and remove ads!' />
 
           <UserStreak />
 
@@ -249,7 +218,4 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-
-
-
 });
