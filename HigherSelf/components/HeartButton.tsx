@@ -2,23 +2,28 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import Animated, {
-    Easing,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-    withTiming,
-    withSequence,
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming
 } from 'react-native-reanimated';
 
 type HeartButtonProps = {
   saved: boolean;
   onPress: () => void;
+  size?: 'default' | 'compact';
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export default function HeartButton({ saved, onPress }: HeartButtonProps) {
+export default function HeartButton({
+  saved,
+  onPress,
+  size = 'default',
+}: HeartButtonProps) {
   const scale = useSharedValue(saved ? 1 : 0.95);
   const translateY = useSharedValue(0);
   const rotate = useSharedValue(saved ? 1 : 0);
@@ -67,13 +72,14 @@ export default function HeartButton({ saved, onPress }: HeartButtonProps) {
       onPress={handlePress}
       style={({ pressed }) => [
         styles.button,
+        size === 'compact' && styles.buttonCompact,
         pressed && styles.buttonPressed,
       ]}
     >
       <Animated.View style={animatedStyle}>
         <Ionicons
           name={saved ? 'heart' : 'heart-outline'}
-          size={26}
+          size={size === 'compact' ? 18 : 26}
           color={saved ? '#EF4444' : '#FFFFFF'}
         />
       </Animated.View>
@@ -99,5 +105,14 @@ const styles = StyleSheet.create({
   },
   buttonPressed: {
     opacity: 0.92,
+  },
+  buttonCompact: {
+    height: 34,
+    width: 34,
+    borderRadius: 17,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
+    elevation: 3,
   },
 });

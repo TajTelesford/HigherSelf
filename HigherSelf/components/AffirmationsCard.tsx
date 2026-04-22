@@ -1,10 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
-import type { ComponentProps } from 'react';
-import { Alert, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
-
 import { useSavedAffirmations } from '@/app/context/SavedAffirmationContext';
 import type { AffirmationCategory } from '@/app/types/affirmations';
 import { Text } from '@/components/ui/text';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import type { ComponentProps } from 'react';
+import { Alert, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import HeartButton from './HeartButton';
 
 type AffirmationsCardProps = {
@@ -16,7 +15,7 @@ type AffirmationsCardProps = {
 
 type ActionButtonProps = {
   accessibilityLabel: string;
-  icon: ComponentProps<typeof Ionicons>['name'];
+  icon: ComponentProps<typeof MaterialIcons>['name'];
   onPress?: () => void;
 };
 
@@ -27,7 +26,7 @@ function ActionButton({ accessibilityLabel, icon, onPress }: ActionButtonProps) 
       onPress={onPress}
       style={({ pressed }) => [styles.actionButton, pressed && styles.actionButtonPressed]}
     >
-      <Ionicons color="#FFFFFF" name={icon} size={26} />
+      <MaterialIcons color="#FFFFFF" name={icon} size={26} />
     </Pressable>
   );
 }
@@ -50,7 +49,7 @@ export function AffirmationsCard({
       </View>
 
       <View style={styles.actions}>
-        <ActionButton accessibilityLabel="Dislike affirmation" icon="close" onPress={() => Alert.alert('Skipped', 'We can show another affirmation next.')} />
+        <ActionButton accessibilityLabel="Dislike affirmation" icon="ios-share" onPress={() => Alert.alert('Skipped', 'We can show another affirmation next.')} />
 
         <HeartButton
           saved={saved}
