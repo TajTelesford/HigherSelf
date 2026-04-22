@@ -1,27 +1,55 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useThemeSelection } from '../context/ThemeContextProvider';
+import { THEMES } from '../data/themes';
 
-export default function ThemeScreen() {
+export default function ThemesScreen() {
+  const { selectedThemeId, setSelectedThemeId } = useThemeSelection();
+
   return (
     <View style={styles.backdrop}>
       <Pressable style={styles.dismissArea} onPress={() => router.back()} />
 
-      <SafeAreaView edges={['bottom']} style={styles.sheet}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.sheet}>
         <View style={styles.handle} />
 
         <View style={styles.header}>
-          <Text style={styles.title}>Theme</Text>
+          <Text style={styles.title}>Choose Theme</Text>
 
           <Pressable onPress={() => router.back()} style={styles.closeButton}>
-            <Ionicons color="#F5F7FA" name="close" size={22} />
+            <Ionicons color="#F5F7FA" name="close" size={20} />
           </Pressable>
         </View>
 
-        <View style={styles.content}>
-          <Text style={styles.contentText}>Theme</Text>
-        </View>
+        <FlatList
+          data={THEMES}
+          keyExtractor={(item) => item.id}
+          numColumns={3}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+          columnWrapperStyle={styles.row}
+          renderItem={({ item }) => {
+            const isSelected = item.id === selectedThemeId;
+
+            return (
+              <Pressable
+                onPress={() => setSelectedThemeId(item.id)}
+                style={[styles.card, isSelected && styles.cardSelected]}
+              >
+                <Image source={item.image} style={styles.image} />
+              </Pressable>
+            );
+          }}
+        />
       </SafeAreaView>
     </View>
   );
@@ -30,40 +58,39 @@ export default function ThemeScreen() {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'flex-end',
   },
   dismissArea: {
     flex: 1,
   },
   sheet: {
-    minHeight: '55%',
     height: '90%',
     maxHeight: '90%',
     backgroundColor: '#121826',
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 28,
+    paddingBottom: 20,
   },
   handle: {
-    alignSelf: 'center',
-    width: 54,
+    width: 52,
     height: 6,
     borderRadius: 999,
-    backgroundColor: '#9CA3AF',
-    opacity: 0.55,
-    marginBottom: 18,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    alignSelf: 'center',
+    marginBottom: 16,
   },
   header: {
+    paddingHorizontal: 20,
+    marginBottom: 18,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   title: {
     color: '#F5F7FA',
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
   },
   closeButton: {
@@ -74,14 +101,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 24,
+    gap: 12,
   },
-  contentText: {
-    color: '#F5F7FA',
-    fontSize: 22,
-    fontWeight: '600',
+  row: {
+    gap: 12,
+    marginBottom: 12,
+  },
+  card: {
+    flex: 1,
+    borderRadius: 22,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
+    backgroundColor: '#1B2233',
+    aspectRatio: 0.68,
+  },
+  cardSelected: {
+    borderColor: '#8B7CFF',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
 });

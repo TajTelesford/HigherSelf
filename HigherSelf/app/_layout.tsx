@@ -5,6 +5,7 @@ import '../global.css';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { SavedAffirmationsProvider } from './context/SavedAffirmationContext';
+import { ThemeContextProvider } from './context/ThemeContextProvider';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -33,47 +34,49 @@ export default function RootLayout() {
       };
 
   return (
-    <SavedAffirmationsProvider>
-      <ThemeProvider value={theme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen
-            name="modals/themes"
-            options={{
-              presentation: 'transparentModal',
-              animation: 'slide_from_bottom',
-            }}
-          />
-          <Stack.Screen
-            name="modals/profile"
-            options={{
-              presentation: 'transparentModal',
-              animation: 'slide_from_bottom',
-            }}
-          />
-          <Stack.Screen
-            name="modals/explore"
-            options={{
-              presentation: 'transparentModal',
-              animation: 'slide_from_bottom',
-            }}
-          />
-          <Stack.Screen
-            name="modals/mood"
-            options={{
-              presentation: 'transparentModal',
-              animation: 'slide_from_bottom',
-            }}
-          />
-          <Stack.Screen
-            name="modals/practiceAffirmations"
-            options={{
-              presentation: 'transparentModal',
-              animation: 'slide_from_bottom',
-            }}
-          />
-        </Stack>
-      </ThemeProvider>
-    </SavedAffirmationsProvider>
+    <ThemeContextProvider>
+      <SavedAffirmationsProvider>
+        <ThemeProvider value={theme}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen
+              name="modals/themes"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="modals/profile"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="modals/explore"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="modals/mood"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="modals/practiceAffirmations"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+          </Stack>
+        </ThemeProvider>
+      </SavedAffirmationsProvider>
+    </ThemeContextProvider>
   );
 }

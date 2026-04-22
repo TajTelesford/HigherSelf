@@ -1,13 +1,26 @@
 import { AffirmationsCard } from '@/components/AffirmationsCard';
 import FloatingActionButtons from '@/components/FloatingActionButtons';
-import { FlatList, StyleSheet, View, useWindowDimensions } from 'react-native';
+import {
+  FlatList,
+  ImageBackground,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from 'react-native';
+
+import { useThemeSelection } from '../context/ThemeContextProvider';
 import { AFFIRMATIONS } from '../data/affirmation';
 
 export default function HomeScreen() {
   const { height } = useWindowDimensions();
+  const { selectedTheme } = useThemeSelection();
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={selectedTheme.image}
+      style={styles.container}
+      resizeMode="cover"
+    >
       <View style={[styles.glow, styles.topGlow]} />
       <View style={[styles.glow, styles.bottomGlow]} />
       <View pointerEvents="none" style={styles.overlay} />
@@ -36,19 +49,17 @@ export default function HomeScreen() {
       />
 
       <FloatingActionButtons />
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#B8B9DA',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(33, 27, 68, 0.28)',
+    backgroundColor: 'rgba(33, 27, 68, 0.30)',
   },
   card: {
     minHeight: 460,
@@ -56,7 +67,7 @@ const styles = StyleSheet.create({
   glow: {
     position: 'absolute',
     borderRadius: 999,
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
   },
   topGlow: {
     top: 80,
