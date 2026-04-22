@@ -1,7 +1,52 @@
-import { Ionicons } from '@expo/vector-icons';
+import { ProfileCardTile } from '@/components/ProfileCardTile';
+import { UnlockAllCardSection } from '@/components/UnlockAllCardSection';
+import UserStreak from '@/components/UserStreak';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+type ProfileCard = {
+  title: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  onPress: () => void;
+};
+
+const PROFILE_CARDS: ProfileCard[] = [
+  {
+    title: 'Topics you follow',
+    icon: 'cards-outline',
+    onPress: () => Alert.alert('Topics', 'Topic customization is coming next.'),
+  },
+  {
+    title: 'App icon',
+    icon: 'shape-outline',
+    onPress: () => Alert.alert('App Icon', 'App icon options are coming next.'),
+  },
+  {
+    title: 'Reminders',
+    icon: 'bell-ring-outline',
+    onPress: () => Alert.alert('Reminders', 'Reminder settings are coming next.'),
+  },
+  {
+    title: 'Home Screen widgets',
+    icon: 'tablet-dashboard',
+    onPress: () => Alert.alert('Widgets', 'Widget setup is coming next.'),
+  },
+];
+
+const PROFILE_CARD_ROWS = PROFILE_CARDS.reduce<ProfileCard[][]>((rows, card, index) => {
+  if (index % 2 === 0) {
+    rows.push([card]);
+  } else {
+    rows[rows.length - 1].push(card);
+  }
+
+  return rows;
+}, []);
+
+
 
 export default function ProfileScreen() {
   return (
@@ -12,16 +57,41 @@ export default function ProfileScreen() {
         <View style={styles.handle} />
 
         <View style={styles.header}>
-          <Text style={styles.title}>Profile</Text>
-
-          <Pressable onPress={() => router.back()} style={styles.closeButton}>
+          <Pressable onPress={() => router.back()} style={styles.circleButton}>
             <Ionicons color="#F5F7FA" name="close" size={22} />
+          </Pressable>
+
+          <Pressable
+            onPress={() => Alert.alert('Settings', 'Settings are coming next.')}
+            style={styles.circleButton}
+          >
+            <Ionicons color="#F5F7FA" name="settings-outline" size={22} />
           </Pressable>
         </View>
 
-        <View style={styles.content}>
-          <Text style={styles.contentText}>Profile</Text>
-        </View>
+        <ScrollView
+          bounces={false}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.title}>Profile</Text>
+
+          <UnlockAllCardSection text='Access all topics, affirmations, themes, and remove ads!' />
+
+          <UserStreak />
+
+          <Text style={styles.sectionTitle}>Customize the app</Text>
+
+          <View style={styles.grid}>
+            {PROFILE_CARD_ROWS.map((row, index) => (
+              <View key={`profile-row-${index}`} style={styles.gridRow}>
+                {row.map((card) => (
+                  <ProfileCardTile key={card.title} {...card} />
+                ))}
+              </View>
+            ))}
+          </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -45,7 +115,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 28,
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 28,
+    paddingBottom: 24,
   },
   handle: {
     alignSelf: 'center',
@@ -53,35 +123,46 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 999,
     backgroundColor: '#9CA3AF',
-    opacity: 0.55,
-    marginBottom: 18,
+    opacity: 0.45,
+    marginBottom: 14,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 22,
+  },
+  content: {
+    paddingBottom: 44,
   },
   title: {
     color: '#F5F7FA',
+    fontSize: 28,
+    fontWeight: '700',
+    marginBottom: 18,
+  },
+  circleButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionTitle: {
+    color: '#F5F7FA',
     fontSize: 24,
     fontWeight: '700',
+    marginTop: 24,
+    marginBottom: 14,
   },
-  closeButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  grid: {
+    gap: 16,
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  contentText: {
-    color: '#F5F7FA',
-    fontSize: 22,
-    fontWeight: '600',
+  gridRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 });
