@@ -5,6 +5,7 @@ import 'react-native-reanimated';
 import '../global.css';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { SavedAffirmationsProvider } from './context/SavedAffirmationContext';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -33,14 +34,16 @@ export default function RootLayout() {
       };
 
   return (
-    <ThemeProvider value={theme}>
-      <Stack>
-        <Stack.Screen
-          name="(tabs)"
-          options={{ headerShown: false, contentStyle: { backgroundColor: '#0B0F1A' } }}
-        />
-      </Stack>
-      <StatusBar style="light" backgroundColor="#0B0F1A" />
-    </ThemeProvider>
+    <SavedAffirmationsProvider>
+      <ThemeProvider value={theme}>
+        <Stack>
+          <Stack.Screen
+            name="(tabs)"
+            options={{ headerShown: false, contentStyle: { backgroundColor: '#0B0F1A' } }}
+          />
+        </Stack>
+        <StatusBar style="light" backgroundColor="#0B0F1A" />
+      </ThemeProvider>
+    </SavedAffirmationsProvider>
   );
 }
