@@ -5,7 +5,7 @@ import { Text } from '@/components/ui/text';
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>HigherSelf</Text>
+      <Text style={styles.title}>Hey</Text>
     </View>
   );
 }

@@ -8,13 +8,39 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark'
+    ? {
+        ...DarkTheme,
+        colors: {
+          ...DarkTheme.colors,
+          background: '#0B0F1A',
+          card: '#0B0F1A',
+          primary: '#8B7CFF',
+          text: '#F5F7FA',
+          border: '#121826',
+        },
+      }
+    : {
+        ...DefaultTheme,
+        colors: {
+          ...DefaultTheme.colors,
+          background: '#0B0F1A',
+          card: '#0B0F1A',
+          primary: '#8B7CFF',
+          text: '#F5F7FA',
+          border: '#121826',
+        },
+      };
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={theme}>
       <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(tabs)"
+          options={{ headerShown: false, contentStyle: { backgroundColor: '#0B0F1A' } }}
+        />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style="light" backgroundColor="#0B0F1A" />
     </ThemeProvider>
   );
 }
