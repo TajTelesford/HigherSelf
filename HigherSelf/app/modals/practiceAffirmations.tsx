@@ -86,7 +86,10 @@ const normalizeCustomAffirmations = (
 };
 
 export default function PracticeAffirmationsScreen() {
-  const { loading: savedLoading, savedAffirmations } = useSavedAffirmations();
+  const { loading: savedLoading } = useSavedAffirmations();
+  const [deviceSavedAffirmations, setDeviceSavedAffirmations] = useState<
+    Affirmation[]
+  >([]);
   const [customAffirmations, setCustomAffirmations] = useState<Affirmation[]>([]);
   const [queuedAffirmations, setQueuedAffirmations] = useState<Affirmation[]>([]);
   const [activeTab, setActiveTab] = useState<PracticeTab>('saved');
@@ -98,14 +101,24 @@ export default function PracticeAffirmationsScreen() {
     const bootstrapPracticeScreen = async () => {
       try {
         const [
+          storedSavedAffirmations,
           storedCustomAffirmations,
           storedQueuedAffirmations,
           storedPromptDate,
         ] = await Promise.all([
+          AsyncStorage.getItem(STORAGE_KEYS.SAVED_AFFIRMATIONS),
           AsyncStorage.getItem(STORAGE_KEYS.CUSTOM_AFFIRMATIONS),
           AsyncStorage.getItem(STORAGE_KEYS.PRACTICE_AFFIRMATION_QUEUE),
           AsyncStorage.getItem(STORAGE_KEYS.PRACTICE_AFFIRMATION_PROMPT_DATE),
         ]);
+
+        if (storedSavedAffirmations) {
+          setDeviceSavedAffirmations(
+            JSON.parse(storedSavedAffirmations) as Affirmation[]
+          );
+        } else {
+          setDeviceSavedAffirmations([]);
+        }
 
         setCustomAffirmations(normalizeCustomAffirmations(storedCustomAffirmations));
 
@@ -133,6 +146,33 @@ export default function PracticeAffirmationsScreen() {
   }, []);
 
   useEffect(() => {
+    if (activeTab !== 'saved') {
+      return;
+    }
+
+    const loadSavedAffirmationsFromDevice = async () => {
+      try {
+        const storedSavedAffirmations = await AsyncStorage.getItem(
+          STORAGE_KEYS.SAVED_AFFIRMATIONS
+        );
+
+        if (storedSavedAffirmations) {
+          setDeviceSavedAffirmations(
+            JSON.parse(storedSavedAffirmations) as Affirmation[]
+          );
+          return;
+        }
+
+        setDeviceSavedAffirmations([]);
+      } catch (error) {
+        console.error('Failed to load saved affirmations from device:', error);
+      }
+    };
+
+    loadSavedAffirmationsFromDevice();
+  }, [activeTab]);
+
+  useEffect(() => {
     if (isBootstrapping) {
       return;
     }
@@ -153,10 +193,10 @@ export default function PracticeAffirmationsScreen() {
 
   const affirmationsByTab = useMemo(
     () => ({
-      saved: savedAffirmations,
+      saved: deviceSavedAffirmations,
       custom: customAffirmations,
     }),
-    [customAffirmations, savedAffirmations]
+    [customAffirmations, deviceSavedAffirmations]
   );
 
   const visibleAffirmations = affirmationsByTab[activeTab];
@@ -188,24 +228,32 @@ export default function PracticeAffirmationsScreen() {
     const selected = queuedIds.has(item.id);
 
     return (
-      <Pressable
-        onPress={() => toggleQueuedAffirmation(item)}
-        style={({ pressed }) => [
+      <View
+        style={[
           styles.affirmationCard,
           selected && styles.affirmationCardSelected,
-          pressed && styles.affirmationCardPressed,
         ]}
       >
         <Text style={styles.affirmationCardText}>{item.text}</Text>
 
-        <View style={[styles.addButton, selected && styles.addButtonSelected]}>
+        <Pressable
+          accessibilityLabel={
+            selected ? 'Remove affirmation from queue' : 'Add affirmation to queue'
+          }
+          onPress={() => toggleQueuedAffirmation(item)}
+          style={({ pressed }) => [
+            styles.addButton,
+            selected && styles.addButtonSelected,
+            pressed && styles.addButtonPressed,
+          ]}
+        >
           <Ionicons
             color="#F5F7FA"
             name={selected ? 'checkmark' : 'add'}
             size={22}
           />
-        </View>
-      </Pressable>
+        </Pressable>
+      </View>
     );
   };
 
@@ -340,57 +388,58 @@ export default function PracticeAffirmationsScreen() {
               </View>
 
               <View style={styles.tabRow}>
-                {PRACTICE_TABS.map((tab) => {
-                  const isActive = tab.id === activeTab;
-                  const count = affirmationsByTab[tab.id].length;
+                <View style={styles.tabSwitcher}>
+                  {PRACTICE_TABS.map((tab) => {
+                    const isActive = tab.id === activeTab;
 
-                  return (
-                    <Pressable
-                      key={tab.id}
-                      onPress={() => setActiveTab(tab.id)}
-                      style={[styles.tabButton, isActive && styles.tabButtonActive]}
-                    >
-                      <Text
-                        style={[styles.tabButtonText, isActive && styles.tabButtonTextActive]}
+                    return (
+                      <Pressable
+                        key={tab.id}
+                        onPress={() => setActiveTab(tab.id)}
+                        style={[styles.tabButton, isActive && styles.tabButtonActive]}
                       >
-                        {tab.label}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.tabCountText,
-                          isActive && styles.tabCountTextActive,
-                        ]}
-                      >
-                        {count}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+                        <Text
+                          style={[styles.tabButtonText, isActive && styles.tabButtonTextActive]}
+                        >
+                          {tab.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
               </View>
 
-              {visibleAffirmations.length ? (
-                <FlatList
-                  contentContainerStyle={styles.affirmationListContent}
-                  data={visibleAffirmations}
-                  keyExtractor={(item) => item.id}
-                  renderItem={renderAffirmationCard}
-                  showsVerticalScrollIndicator={false}
-                  style={styles.affirmationList}
-                />
-              ) : (
-                <View style={styles.emptyTabState}>
-                  <Text style={styles.emptyTabTitle}>
-                    {activeTab === 'saved'
-                      ? 'No saved affirmations yet'
-                      : 'No custom affirmations yet'}
-                  </Text>
-                  <Text style={styles.emptyTabCopy}>
-                    {activeTab === 'saved'
-                      ? 'Liked affirmations from the home screen will appear here.'
-                      : 'Affirmations you create yourself will appear in this tab.'}
-                  </Text>
-                </View>
-              )}
+              <Text style={styles.tabMetaText}>
+                {affirmationsByTab[activeTab].length} affirmation
+                {affirmationsByTab[activeTab].length === 1 ? '' : 's'}
+              </Text>
+
+              <View style={styles.listRegion}>
+                {visibleAffirmations.length ? (
+                  <FlatList
+                    contentContainerStyle={styles.affirmationListContent}
+                    data={visibleAffirmations}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderAffirmationCard}
+                    ItemSeparatorComponent={() => <View style={styles.listSeparator} />}
+                    showsVerticalScrollIndicator={false}
+                    style={styles.affirmationList}
+                  />
+                ) : (
+                  <View style={styles.emptyTabState}>
+                    <Text style={styles.emptyTabTitle}>
+                      {activeTab === 'saved'
+                        ? 'No saved affirmations yet'
+                        : 'No custom affirmations yet'}
+                    </Text>
+                    <Text style={styles.emptyTabCopy}>
+                      {activeTab === 'saved'
+                        ? 'Liked affirmations from the home screen will appear here.'
+                        : 'Affirmations you create yourself will appear in this tab.'}
+                    </Text>
+                  </View>
+                )}
+              </View>
 
               <View style={styles.modalFooter}>
                 <View style={styles.queueCountPill}>
@@ -638,7 +687,7 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 430,
-    maxHeight: '86%',
+    height: '86%',
     borderRadius: 28,
     backgroundColor: '#101726',
     borderWidth: 1,
@@ -666,25 +715,30 @@ const styles = StyleSheet.create({
     maxWidth: 260,
   },
   tabRow: {
-    flexDirection: 'row',
-    gap: 10,
     marginTop: 22,
-    marginBottom: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  tabButton: {
-    flex: 1,
-    borderRadius: 16,
+  tabSwitcher: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.06)',
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    borderRadius: 18,
+    padding: 4,
+  },
+  tabButton: {
+    minWidth: 116,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
   tabButtonActive: {
-    backgroundColor: 'rgba(139, 92, 246, 0.18)',
-    borderColor: 'rgba(167, 139, 250, 0.45)',
+    backgroundColor: 'rgba(139, 92, 246, 0.22)',
   },
   tabButtonText: {
     color: '#C6CDD8',
@@ -694,18 +748,21 @@ const styles = StyleSheet.create({
   tabButtonTextActive: {
     color: '#F5F7FA',
   },
-  tabCountText: {
+  tabMetaText: {
     color: '#94A3B8',
     fontSize: 13,
     fontWeight: '600',
-    marginTop: 4,
+    textAlign: 'center',
+    marginTop: 12,
+    marginBottom: 14,
   },
-  tabCountTextActive: {
-    color: '#DDD6FE',
+  listRegion: {
+    flex: 1,
+    minHeight: 220,
   },
   affirmationListContent: {
-    gap: 12,
     paddingBottom: 18,
+    paddingTop: 2,
   },
   affirmationList: {
     flex: 1,
@@ -714,38 +771,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    borderRadius: 22,
+    borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#151C2B',
+    backgroundColor: '#141A26',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.06)',
   },
   affirmationCardSelected: {
-    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    backgroundColor: 'rgba(139, 92, 246, 0.16)',
     borderColor: 'rgba(167, 139, 250, 0.5)',
-  },
-  affirmationCardPressed: {
-    opacity: 0.92,
-    transform: [{ scale: 0.99 }],
   },
   affirmationCardText: {
     flex: 1,
     color: '#F5F7FA',
-    fontSize: 15,
+    fontSize: 16,
     lineHeight: 23,
     fontWeight: '500',
   },
   addButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: 'rgba(255,255,255,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   addButtonSelected: {
     backgroundColor: 'rgba(139, 92, 246, 0.55)',
+    borderColor: 'rgba(167, 139, 250, 0.38)',
+  },
+  addButtonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.96 }],
+  },
+  listSeparator: {
+    height: 12,
   },
   emptyTabState: {
     flex: 1,
