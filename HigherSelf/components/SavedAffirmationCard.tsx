@@ -10,19 +10,44 @@ type SavedAffirmationCardProps = {
   affirmation: Affirmation;
   bookmarked?: boolean;
   onBookmarkPress?: () => void;
+  showSavedDate?: boolean;
+};
+
+const formatSavedDate = (savedAt?: string) => {
+  if (!savedAt) {
+    return null;
+  }
+
+  const parsedDate = new Date(savedAt);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return parsedDate.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 };
 
 export function SavedAffirmationCard({
   affirmation,
   bookmarked = false,
   onBookmarkPress,
+  showSavedDate = true,
 }: SavedAffirmationCardProps) {
   const { isSaved, toggleSaved } = useSavedAffirmations();
   const saved = isSaved(affirmation.id);
+  const savedDate = formatSavedDate(affirmation.savedAt);
 
   return (
     <View style={styles.card}>
       <Text style={styles.text}>{affirmation.text}</Text>
+
+      {showSavedDate && savedDate ? (
+        <Text style={styles.savedDate}>{savedDate}</Text>
+      ) : null}
 
       <View style={styles.actionsRow}>
         <HeartButton
@@ -80,6 +105,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     marginTop: 4,
+  },
+  savedDate: {
+    color: 'rgba(245, 247, 250, 0.58)',
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 8,
   },
   iconButton: {
     width: 34,

@@ -9,4 +9,5 @@ export type Affirmation = {
   id: string;
   text: string;
   category: AffirmationCategory | string;
+  savedAt?: string;
 };

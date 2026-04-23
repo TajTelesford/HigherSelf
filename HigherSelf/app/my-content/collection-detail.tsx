@@ -97,6 +97,7 @@ export default function CollectionDetailScreen() {
             affirmation={item}
             bookmarked={bookmarkedAffirmationIds.has(item.id)}
             onBookmarkPress={() => setSelectedAffirmation(item)}
+            showSavedDate={false}
           />
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
