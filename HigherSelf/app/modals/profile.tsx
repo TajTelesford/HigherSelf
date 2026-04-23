@@ -16,11 +16,6 @@ type ProfileCard = {
 
 const PROFILE_CARDS: ProfileCard[] = [
   {
-    title: 'Topics you follow',
-    icon: 'cards-outline',
-    onPress: () => Alert.alert('Topics', 'Topic customization is coming next.'),
-  },
-  {
     title: 'App icon',
     icon: 'shape-outline',
     onPress: () => Alert.alert('App Icon', 'App icon options are coming next.'),
