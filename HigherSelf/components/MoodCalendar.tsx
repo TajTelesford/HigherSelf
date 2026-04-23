@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { DailyCalendarCell } from './DailyCalendarCell';
 import type { MoodOption } from './MoodPicker';
 
 type MoodCalendarProps = {
@@ -69,7 +69,7 @@ export function MoodCalendar({
       <View style={styles.calendarGrid}>
         {cells.map((dateKey, index) => {
           if (!dateKey) {
-            return <View key={`empty-${index}`} style={styles.emptyDayCell} />;
+            return <DailyCalendarCell key={`empty-${index}`} />;
           }
 
           const moodId = moodsByDate[dateKey];
@@ -78,44 +78,12 @@ export function MoodCalendar({
           const isToday = dateKey === getTodayKey();
 
           return (
-            <View
+            <DailyCalendarCell
               key={dateKey}
-              style={[
-                styles.dayCell,
-                isToday && styles.todayCell,
-                mood && {
-                  borderColor: `${mood.accent}66`,
-                  backgroundColor: `${mood.accent}14`,
-                },
-              ]}
-            >
-              <Text
-                style={[styles.dayNumber, isToday && styles.todayDayNumber]}
-              >
-                {dayNumber}
-              </Text>
-
-              {mood ? (
-                <>
-                  <View
-                    style={[
-                      styles.calendarIconWrap,
-                      { backgroundColor: `${mood.accent}22` },
-                    ]}
-                  >
-                    <Ionicons color={mood.accent} name={mood.icon} size={16} />
-                  </View>
-                  <Text
-                    numberOfLines={1}
-                    style={[styles.calendarMoodLabel, { color: mood.accent }]}
-                  >
-                    {mood.label}
-                  </Text>
-                </>
-              ) : (
-                <Text style={styles.noMoodLabel}>No mood</Text>
-              )}
-            </View>
+              dayNumber={dayNumber}
+              isToday={isToday}
+              mood={mood}
+            />
           );
         })}
       </View>
@@ -125,8 +93,9 @@ export function MoodCalendar({
 
 const styles = StyleSheet.create({
   calendarCard: {
+    height: 485,
     borderRadius: 22,
-    padding: 16,
+    padding: 20,
     backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
@@ -158,52 +127,7 @@ const styles = StyleSheet.create({
   calendarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-  },
-  emptyDayCell: {
-    width: '13.7%',
-    aspectRatio: 0.8,
-  },
-  dayCell: {
-    width: '13.7%',
-    aspectRatio: 0.8,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    alignItems: 'center',
-  },
-  todayCell: {
-    borderColor: '#F5F7FA',
-  },
-  dayNumber: {
-    color: '#E5EAF1',
-    fontSize: 12,
-    fontWeight: '700',
-    marginBottom: 6,
-  },
-  todayDayNumber: {
-    color: '#FFFFFF',
-  },
-  calendarIconWrap: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  calendarMoodLabel: {
-    fontSize: 9,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  noMoodLabel: {
-    color: '#6B7280',
-    fontSize: 9,
-    fontWeight: '600',
-    textAlign: 'center',
+    justifyContent: 'space-between',
+    rowGap: 8,
   },
 });
