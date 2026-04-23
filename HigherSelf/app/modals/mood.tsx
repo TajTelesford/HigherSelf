@@ -31,6 +31,7 @@ const getTodayKey = () => new Date().toISOString().slice(0, 10);
 export default function MoodScreen() {
   const [selectedMoodId, setSelectedMoodId] = useState<string | null>(null);
   const [moodsByDate, setMoodsByDate] = useState<Record<string, string>>({});
+  const [isEditingMood, setIsEditingMood] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export default function MoodScreen() {
   }, []);
 
   const handleSelectMood = async (moodId: string) => {
-    if (selectedMoodId) {
+    if (selectedMoodId && !isEditingMood) {
       return;
     }
 
@@ -83,6 +84,7 @@ export default function MoodScreen() {
 
       setMoodsByDate(parsedMoods);
       setSelectedMoodId(moodId);
+      setIsEditingMood(false);
     } catch (error) {
       console.error('Failed to save mood:', error);
     }
@@ -90,6 +92,7 @@ export default function MoodScreen() {
 
   const selectedMood = MOOD_OPTIONS.find((mood) => mood.id === selectedMoodId);
   const isLocked = Boolean(selectedMoodId);
+  const shouldShowPicker = !isLocked || isEditingMood;
 
   return (
     <View style={styles.backdrop}>
@@ -109,17 +112,19 @@ export default function MoodScreen() {
         <View style={styles.content}>
           <Text style={styles.prompt}>How is your mood today?</Text>
           <Text style={styles.helperText}>
-            Pick one feeling for today. Once selected, it locks until tomorrow.
+            {isEditingMood
+              ? 'Choose a new mood for today. Saving will update what is stored on this device.'
+              : 'Pick one feeling for today. Once selected, it locks until tomorrow.'}
           </Text>
 
           {loading ? (
             <View style={styles.loadingState}>
               <ActivityIndicator color="#F5F7FA" />
             </View>
-          ) : !isLocked ? (
+          ) : shouldShowPicker ? (
             <>
               <MoodPicker
-                isLocked={isLocked}
+                isLocked={false}
                 moods={MOOD_OPTIONS}
                 onSelectMood={handleSelectMood}
                 selectedMoodId={selectedMoodId}
@@ -130,7 +135,10 @@ export default function MoodScreen() {
               contentContainerStyle={styles.historyContent}
               showsVerticalScrollIndicator={false}
             >
-              <TodaysMood mood={selectedMood} />
+              <TodaysMood
+                mood={selectedMood}
+                onConfirmUpdate={() => setIsEditingMood(true)}
+              />
               <MoodCalendar moodOptions={MOOD_OPTIONS} moodsByDate={moodsByDate} />
             </ScrollView>
           )}
