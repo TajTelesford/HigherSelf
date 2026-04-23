@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, View } from 'react-native';
 
-import { useSavedAffirmations } from '@/app/context/SavedAffirmationContext';
-import type { Affirmation } from '@/app/types/affirmations';
+import { useSavedAffirmations } from '@/context/SavedAffirmationContext';
+import type { Affirmation } from '@/types/affirmations';
 import { Text } from '@/components/ui/text';
 import HeartButton from './HeartButton';
 

@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MoodCalendar } from '@/components/MoodCalendar';
 import { MoodPicker, type MoodOption } from '@/components/MoodPicker';
 import { TodaysMood } from '@/components/TodaysMood';
+import { STORAGE_KEYS } from '@/data/HigherSelf_StorageKeys';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -14,8 +15,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { STORAGE_KEYS } from '../data/HigherSelf_StorageKeys';
 
 const MOOD_OPTIONS: MoodOption[] = [
   { id: 'amazing', label: 'Amazing', icon: 'happy-outline', accent: '#F59E0B' },

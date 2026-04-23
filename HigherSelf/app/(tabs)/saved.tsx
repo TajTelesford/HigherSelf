@@ -1,4 +1,4 @@
-import { useSavedAffirmations } from '@/app/context/SavedAffirmationContext';
+import { useSavedAffirmations } from '@/context/SavedAffirmationContext';
 import { SavedAffirmationCard } from '@/components/SavedAffirmationCard';
 import { Text } from '@/components/ui/text';
 import { FlatList, StyleSheet, View } from 'react-native';
