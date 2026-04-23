@@ -15,11 +15,15 @@ import {
 } from 'expo-audio';
 import { Directory, File, Paths } from 'expo-file-system';
 import { router } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
+  Dimensions,
   Easing,
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -27,6 +31,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 type StoredAffirmationLike =
   | string
@@ -111,18 +117,22 @@ const formatSessionDate = (isoDate: string) =>
     day: '2-digit',
   });
 
+const AFFIRMATION_CARD_WIDTH = Dimensions.get('window').width - 84;
+
 export default function RecordAffirmationsScreen() {
   const recordActionProgress = useRef(new Animated.Value(0)).current;
+  const affirmationCarouselRef = useRef<FlatList<Affirmation> | null>(null);
+  const currentAffirmationIndexRef = useRef(0);
   const [deviceSavedAffirmations, setDeviceSavedAffirmations] = useState<
     Affirmation[]
   >([]);
   const [customAffirmations, setCustomAffirmations] = useState<Affirmation[]>([]);
   const [queuedAffirmations, setQueuedAffirmations] = useState<Affirmation[]>([]);
   const [showPicker, setShowPicker] = useState(false);
-  const [queueExpanded, setQueueExpanded] = useState(true);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [isWorking, setIsWorking] = useState(false);
   const [pendingPlaybackStart, setPendingPlaybackStart] = useState(false);
+  const [currentAffirmationIndex, setCurrentAffirmationIndex] = useState(0);
   const [statusMessage, setStatusMessage] = useState(
     'Tap the mic to start recording in your own voice.'
   );
@@ -232,11 +242,6 @@ export default function RecordAffirmationsScreen() {
     }).start();
   }, [recordActionProgress, recorderState.isRecording]);
 
-  const queueCountLabel = useMemo(() => {
-    const count = queuedAffirmations.length;
-    return `${count} affirmation${count === 1 ? '' : 's'} in queue`;
-  }, [queuedAffirmations]);
-
   const playbackDurationMs = Math.round(playerStatus.duration * 1000);
   const playbackPositionMs = Math.round(playerStatus.currentTime * 1000);
   const playbackProgress = playbackDurationMs
@@ -258,6 +263,29 @@ export default function RecordAffirmationsScreen() {
     inputRange: [0, 1],
     outputRange: [0, 14],
   });
+  const activeAffirmation =
+    queuedAffirmations[currentAffirmationIndex] ?? queuedAffirmations[0] ?? null;
+
+  useEffect(() => {
+    if (!queuedAffirmations.length) {
+      currentAffirmationIndexRef.current = 0;
+      setCurrentAffirmationIndex(0);
+      return;
+    }
+
+    const nextIndex = Math.min(
+      currentAffirmationIndexRef.current,
+      queuedAffirmations.length - 1
+    );
+
+    currentAffirmationIndexRef.current = nextIndex;
+    setCurrentAffirmationIndex(nextIndex);
+
+    affirmationCarouselRef.current?.scrollToIndex({
+      index: nextIndex,
+      animated: false,
+    });
+  }, [queuedAffirmations]);
 
   const toggleQueuedAffirmation = (affirmation: Affirmation) => {
     setQueuedAffirmations((currentQueue) => {
@@ -439,6 +467,35 @@ export default function RecordAffirmationsScreen() {
     }
   };
 
+  const handleAffirmationSwipeEnd = async (
+    event: NativeSyntheticEvent<NativeScrollEvent>
+  ) => {
+    const cardWidth = event.nativeEvent.layoutMeasurement.width;
+
+    if (!cardWidth || !queuedAffirmations.length) {
+      return;
+    }
+
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / cardWidth);
+    const clampedIndex = Math.max(
+      0,
+      Math.min(nextIndex, queuedAffirmations.length - 1)
+    );
+    const previousIndex = currentAffirmationIndexRef.current;
+
+    currentAffirmationIndexRef.current = clampedIndex;
+    setCurrentAffirmationIndex(clampedIndex);
+
+    if (
+      recorderState.isRecording &&
+      queuedAffirmations.length > 1 &&
+      clampedIndex === queuedAffirmations.length - 1 &&
+      previousIndex !== clampedIndex
+    ) {
+      await stopRecording();
+    }
+  };
+
   const isLoading = isBootstrapping;
 
   return (
@@ -470,15 +527,88 @@ export default function RecordAffirmationsScreen() {
               <Text style={styles.heroTitle}>Speak your affirmations with conviction.</Text>
               <Text style={styles.heroCopy}>{statusMessage}</Text>
 
-              <View style={styles.visualizerCard}>
-                <View style={styles.visualizerGlow} />
+              {queuedAffirmations.length ? (
+                <View style={styles.carouselSection}>
+                  <View style={styles.carouselHeader}>
+                    <Text style={styles.carouselLabel}>Affirmation Flow</Text>
+                    <Text style={styles.carouselCounter}>
+                      {currentAffirmationIndex + 1} / {queuedAffirmations.length}
+                    </Text>
+                  </View>
 
-                <Text style={styles.dateText}>
-                  {lastSavedRecording
-                    ? `Last saved ${formatSessionDate(lastSavedRecording.createdAt)}`
-                    : formatSessionDate(new Date().toISOString())}
-                </Text>
-              </View>
+                  <FlatList
+                    ref={affirmationCarouselRef}
+                    contentContainerStyle={styles.carouselListContent}
+                    data={queuedAffirmations}
+                    horizontal
+                    keyExtractor={(item) => item.id}
+                    getItemLayout={(_, index) => ({
+                      index,
+                      length: AFFIRMATION_CARD_WIDTH,
+                      offset: AFFIRMATION_CARD_WIDTH * index,
+                    })}
+                    onMomentumScrollEnd={handleAffirmationSwipeEnd}
+                    pagingEnabled
+                    renderItem={({ index, item }) => (
+                      <View style={styles.affirmationCardFrame}>
+                        <View
+                          style={[
+                            styles.affirmationCard,
+                            index === currentAffirmationIndex && styles.affirmationCardActive,
+                          ]}
+                        >
+                          <View style={styles.affirmationCardGlowPrimary} />
+                          <View style={styles.affirmationCardGlowAccent} />
+                          <View style={styles.affirmationCardNoise} />
+
+                          <View style={styles.affirmationCardTopRow}>
+                            <View style={styles.affirmationQuoteBadge}>
+                              <FontAwesome name="quote-left" size={18} color="white" />
+                            </View>
+                            <View style={styles.affirmationArrowBadge}>
+                              <Ionicons
+                                color="#F5F7FA"
+                                name="chevron-forward"
+                                size={16}
+                              />
+                            </View>
+                          </View>
+
+                          <Text style={styles.affirmationCardText}>{item.text}</Text>
+
+                          <View style={styles.affirmationCardBottomRow}>
+                            <Text style={styles.affirmationCardCategory}>
+                              {item.category ? item.category.replace(/^\w/, (char) => char.toUpperCase()) : 'Affirmation'}
+                            </Text>
+
+                            <View style={styles.affirmationHeartBadge}>
+                              <FontAwesome name="quote-right" size={18} color="white" />
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    )}
+                    scrollEnabled={!isWorking && queuedAffirmations.length > 1}
+                    showsHorizontalScrollIndicator={false}
+                    snapToAlignment="center"
+                  />
+
+                  <Text style={styles.carouselHint}>
+                    {recorderState.isRecording
+                      ? 'Swipe through each affirmation. Reaching the final card ends the take.'
+                      : activeAffirmation
+                        ? `Start from: "${activeAffirmation.text}"`
+                        : 'Swipe to preview your affirmations.'}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.emptyCarouselState}>
+                  <Text style={styles.emptyCarouselTitle}>Your queue is empty</Text>
+                  <Text style={styles.emptyCarouselCopy}>
+                    Add affirmations to build a swipeable recording flow for this take.
+                  </Text>
+                </View>
+              )}
 
               <View style={styles.recordButtonWrap}>
                 <Animated.View
@@ -522,54 +652,6 @@ export default function RecordAffirmationsScreen() {
                   <Text style={styles.editQueueButtonText}>Edit Queue</Text>
                 </Pressable>
               </View>
-            </View>
-
-            <View style={styles.queuePanel}>
-              <Pressable
-                onPress={() => setQueueExpanded((current) => !current)}
-                style={styles.queueHeader}
-              >
-                <View>
-                  <Text style={styles.queueTitle}>Affirmation Queue</Text>
-                  <Text style={styles.queueSubtitle}>
-                    {queuedAffirmations.length
-                      ? 'These are the affirmations ready for this take.'
-                      : 'Add affirmations to give your recording a script.'}
-                  </Text>
-                </View>
-
-                <View style={styles.queueHeaderRight}>
-                  <Text style={styles.queueCountPill}>{queueCountLabel}</Text>
-                  <Ionicons
-                    color="#F5F7FA"
-                    name={queueExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={20}
-                  />
-                </View>
-              </Pressable>
-
-              {queueExpanded ? (
-                queuedAffirmations.length ? (
-                  <View style={styles.queueList}>
-                    {queuedAffirmations.map((affirmation, index) => (
-                      <View key={affirmation.id} style={styles.queueItem}>
-                        <View style={styles.queueIndex}>
-                          <Text style={styles.queueIndexText}>{index + 1}</Text>
-                        </View>
-                        <Text style={styles.queueItemText}>{affirmation.text}</Text>
-                      </View>
-                    ))}
-                  </View>
-                ) : (
-                  <View style={styles.emptyQueueState}>
-                    <Text style={styles.emptyQueueTitle}>Your queue is empty</Text>
-                    <Text style={styles.emptyQueueCopy}>
-                      Pull in saved or custom affirmations, then start recording when
-                      you&apos;re ready.
-                    </Text>
-                  </View>
-                )
-              ) : null}
             </View>
 
             {lastSavedRecording ? (
@@ -727,34 +809,172 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 10,
   },
-  visualizerCard: {
+  carouselSection: {
     marginTop: 22,
-    borderRadius: 28,
-    minHeight: 112,
-    paddingHorizontal: 18,
-    paddingVertical: 24,
+    gap: 12,
+  },
+  carouselHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#070B14',
-    borderWidth: 1,
-    borderColor: 'rgba(167, 139, 250, 0.18)',
+    justifyContent: 'space-between',
+    paddingHorizontal: 6,
+  },
+  carouselLabel: {
+    color: '#BFA6FF',
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  carouselCounter: {
+    color: '#DCCEFF',
+    fontSize: 12,
+    fontWeight: '700',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(139, 92, 246, 0.16)',
+    borderRadius: 999,
     overflow: 'hidden',
   },
-  visualizerGlow: {
-    position: 'absolute',
-    width: 240,
-    height: 240,
-    borderRadius: 999,
-    backgroundColor: 'rgba(139, 92, 246, 0.2)',
-    shadowColor: '#8B5CF6',
-    shadowOpacity: 0.6,
-    shadowRadius: 32,
-    shadowOffset: { width: 0, height: 0 },
+  affirmationCardFrame: {
+    width: AFFIRMATION_CARD_WIDTH,
   },
-  dateText: {
-    color: '#8E99AF',
+  affirmationCard: {
+    minHeight: 208,
+    borderRadius: 30,
+    paddingHorizontal: 28,
+    paddingVertical: 26,
+    backgroundColor: '#171229',
+    borderWidth: 1,
+    borderColor: 'rgba(202, 177, 255, 0.18)',
+    shadowColor: '#4C1D95',
+    shadowOpacity: 0.28,
+    shadowRadius: 28,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 10,
+    justifyContent: 'space-between',
+    overflow: 'hidden',
+  },
+  carouselListContent: {
+    paddingHorizontal: 6,
+  },
+  affirmationCardActive: {
+    borderColor: 'rgba(245, 224, 255, 0.34)',
+    backgroundColor: '#1A1330',
+  },
+  affirmationCardGlowPrimary: {
+    position: 'absolute',
+    top: -18,
+    left: -24,
+    width: 220,
+    height: 220,
+    borderRadius: 999,
+    backgroundColor: 'rgba(136, 84, 255, 0.26)',
+    opacity: 0.95,
+  },
+  affirmationCardGlowAccent: {
+    position: 'absolute',
+    right: -26,
+    bottom: -18,
+    width: 170,
+    height: 170,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 184, 108, 0.28)',
+  },
+  affirmationCardNoise: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: 'rgba(255,255,255,0.02)',
+  },
+  affirmationCardTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    zIndex: 1,
+  },
+  affirmationQuoteBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(137, 92, 246, 0.22)',
+    borderWidth: 1,
+    borderColor: 'rgba(232, 219, 255, 0.18)',
+  },
+  affirmationArrowBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  affirmationCardText: {
+    color: '#F5F7FA',
+    fontSize: 21,
+    lineHeight: 31,
+    fontWeight: '700',
+    textAlign: 'left',
+    letterSpacing: 0.3,
+    zIndex: 1,
+    marginTop: 18,
+    marginBottom: 20,
+    maxWidth: '88%',
+  },
+  affirmationCardBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    zIndex: 1,
+  },
+  affirmationCardCategory: {
+    color: '#E8DBFF',
     fontSize: 13,
     fontWeight: '600',
+    letterSpacing: 0.2,
+  },
+  affirmationHeartBadge: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 196, 132, 0.22)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 236, 218, 0.18)',
+  },
+  carouselHint: {
+    color: '#A7B1C5',
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: 'center',
+    paddingHorizontal: 12,
+  },
+  emptyCarouselState: {
+    marginTop: 22,
+    borderRadius: 28,
+    paddingHorizontal: 22,
+    paddingVertical: 28,
+    backgroundColor: '#070B14',
+    borderWidth: 1,
+    borderColor: 'rgba(167, 139, 250, 0.16)',
+    alignItems: 'center',
+  },
+  emptyCarouselTitle: {
+    color: '#F5F7FA',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  emptyCarouselCopy: {
+    color: '#9FA9BC',
+    fontSize: 14,
+    lineHeight: 21,
+    marginTop: 10,
+    textAlign: 'center',
   },
   recordButtonWrap: {
     width: '100%',
@@ -803,98 +1023,6 @@ const styles = StyleSheet.create({
     color: '#EFE9FF',
     fontSize: 14,
     fontWeight: '700',
-  },
-  queuePanel: {
-    borderRadius: 28,
-    padding: 18,
-    backgroundColor: '#0C1220',
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.16)',
-  },
-  queueHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 14,
-  },
-  queueTitle: {
-    color: '#F5F7FA',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  queueSubtitle: {
-    color: '#9FA9BC',
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 6,
-    maxWidth: 220,
-  },
-  queueHeaderRight: {
-    alignItems: 'flex-end',
-    gap: 8,
-  },
-  queueCountPill: {
-    color: '#DCCEFF',
-    fontSize: 12,
-    fontWeight: '700',
-    backgroundColor: 'rgba(139, 92, 246, 0.16)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  queueList: {
-    marginTop: 18,
-    gap: 12,
-  },
-  queueItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderRadius: 20,
-    backgroundColor: '#10192C',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-  },
-  queueIndex: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(139, 92, 246, 0.18)',
-  },
-  queueIndexText: {
-    color: '#F5F7FA',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  queueItemText: {
-    flex: 1,
-    color: '#F5F7FA',
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  emptyQueueState: {
-    marginTop: 18,
-    borderRadius: 20,
-    padding: 18,
-    backgroundColor: '#10192C',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-  },
-  emptyQueueTitle: {
-    color: '#F5F7FA',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  emptyQueueCopy: {
-    color: '#9FA9BC',
-    fontSize: 14,
-    lineHeight: 21,
-    marginTop: 8,
   },
   savedCard: {
     borderRadius: 24,
