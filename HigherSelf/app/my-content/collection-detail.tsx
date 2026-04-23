@@ -2,13 +2,37 @@ import { Ionicons } from '@expo/vector-icons';
 import { Text } from '@/components/ui/text';
 import { useAffirmationCollections } from '@/context/AffirmationCollectionsContext';
 import { router, useLocalSearchParams } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CollectionDetailScreen() {
   const { collectionId } = useLocalSearchParams<{ collectionId?: string }>();
-  const { getCollectionById, loading } = useAffirmationCollections();
+  const { deleteCollection, getCollectionById, loading } =
+    useAffirmationCollections();
   const collection = collectionId ? getCollectionById(collectionId) : undefined;
+
+  const handleDeleteCollection = () => {
+    if (!collection) return;
+
+    Alert.alert(
+      'Delete collection?',
+      `Remove "${collection.name}" and everything inside it?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            deleteCollection(collection.id);
+            router.replace('/my-content/collections');
+          },
+        },
+      ]
+    );
+  };
 
   const renderContent = () => {
     if (loading) {
@@ -69,17 +93,33 @@ export default function CollectionDetailScreen() {
         <View style={styles.handle} />
 
         <View style={styles.header}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <Ionicons color="#F5F7FA" name="chevron-back" size={30} />
-          </Pressable>
+          <View style={styles.headerLeft}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.back()}
+              style={styles.iconButton}
+            >
+              <Ionicons color="#F5F7FA" name="chevron-back" size={30} />
+            </Pressable>
 
-          <Text numberOfLines={1} style={styles.title}>
-            {collection?.name ?? 'Collection'}
-          </Text>
+            <Text numberOfLines={1} style={styles.title}>
+              {collection?.name ?? 'Collection'}
+            </Text>
+          </View>
+
+          {collection ? (
+            <Pressable
+              accessibilityLabel="Delete collection"
+              accessibilityRole="button"
+              onPress={handleDeleteCollection}
+              style={styles.deleteButton}
+            >
+              <View pointerEvents="none" style={styles.deleteGradientBase} />
+              <View pointerEvents="none" style={styles.deleteGradientPurple} />
+              <View pointerEvents="none" style={styles.deleteGradientGold} />
+              <Ionicons color="#F5F7FA" name="trash-outline" size={20} />
+            </Pressable>
+          ) : null}
         </View>
 
         <Pressable accessibilityRole="button" style={styles.feedButton}>
@@ -124,9 +164,16 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 24,
+    justifyContent: 'space-between',
   },
-  backButton: {
+  headerLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 24,
+    paddingRight: 16,
+  },
+  iconButton: {
     width: 38,
     height: 38,
     borderRadius: 19,
@@ -134,11 +181,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  deleteButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    backgroundColor: '#11182A',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 124, 255, 0.28)',
+  },
+  deleteGradientBase: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#11182A',
+  },
+  deleteGradientPurple: {
+    position: 'absolute',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(139, 124, 255, 0.48)',
+    top: -5,
+    left: -3,
+  },
+  deleteGradientGold: {
+    position: 'absolute',
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(242, 201, 76, 0.7)',
+    right: -2,
+    bottom: -1,
+  },
   title: {
-    flex: 1,
     color: '#F5F7FA',
     fontSize: 26,
     fontWeight: '800',
+    flexShrink: 1,
   },
   feedButton: {
     height: 76,

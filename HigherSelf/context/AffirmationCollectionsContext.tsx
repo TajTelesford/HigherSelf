@@ -15,6 +15,7 @@ type AffirmationCollectionsContextType = {
   collections: AffirmationCollection[];
   loading: boolean;
   addCollection: (name: string) => AffirmationCollection;
+  deleteCollection: (id: string) => void;
   getCollectionById: (id: string) => AffirmationCollection | undefined;
 };
 
@@ -80,6 +81,12 @@ export function AffirmationCollectionsProvider({
     return collection;
   }, []);
 
+  const deleteCollection = useCallback((id: string) => {
+    setCollections((prev) =>
+      prev.filter((collection) => collection.id !== id)
+    );
+  }, []);
+
   const getCollectionById = useCallback(
     (id: string) => collections.find((collection) => collection.id === id),
     [collections]
@@ -90,9 +97,10 @@ export function AffirmationCollectionsProvider({
       collections,
       loading,
       addCollection,
+      deleteCollection,
       getCollectionById,
     }),
-    [addCollection, collections, getCollectionById, loading]
+    [addCollection, collections, deleteCollection, getCollectionById, loading]
   );
 
   return (
