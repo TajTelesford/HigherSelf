@@ -1,7 +1,10 @@
 import CustomChooseAffirmationAlert from '@/components/CustomChooseAffirmationAlert';
+import { useCustomAffirmations } from '@/context/CustomAffirmationsContext';
+import { useSavedAffirmations } from '@/context/SavedAffirmationContext';
 import RecordMicrophoneButton from '@/components/RecordMicrophoneButton';
 import { STORAGE_KEYS } from '@/data/HigherSelf_StorageKeys';
 import type { Affirmation } from '@/types/affirmations';
+import type { VoiceRecordingEntry } from '@/types/recordings';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -32,24 +35,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-type StoredAffirmationLike =
-  | string
-  | {
-      id?: string | number;
-      text?: string;
-      affirmation?: string;
-      category?: string;
-    };
-
-type VoiceRecordingEntry = {
-  id: string;
-  uri: string;
-  fileName: string;
-  durationMillis: number;
-  createdAt: string;
-  affirmations: Affirmation[];
-};
-
 type CarouselItem =
   | {
       type: 'affirmation';
@@ -60,55 +45,6 @@ type CarouselItem =
       type: 'completion';
       id: 'completion-sentinel';
     };
-
-const normalizeCustomAffirmations = (
-  value: string | null
-): Affirmation[] => {
-  if (!value) {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(value) as StoredAffirmationLike[];
-
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed
-      .map((item, index) => {
-        if (typeof item === 'string') {
-          const text = item.trim();
-
-          if (!text) {
-            return null;
-          }
-
-          return {
-            id: `custom-${index}-${text}`,
-            text,
-            category: 'custom',
-          } satisfies Affirmation;
-        }
-
-        const text = item.text?.trim() || item.affirmation?.trim();
-
-        if (!text) {
-          return null;
-        }
-
-        return {
-          id: String(item.id ?? `custom-${index}-${text}`),
-          text,
-          category: item.category ?? 'custom',
-        } satisfies Affirmation;
-      })
-      .filter((item): item is Affirmation => Boolean(item));
-  } catch (error) {
-    console.error('Failed to parse custom affirmations:', error);
-    return [];
-  }
-};
 
 const formatElapsed = (durationMillis: number) => {
   const totalSeconds = Math.max(0, Math.floor(durationMillis / 1000));
@@ -123,15 +59,13 @@ const formatElapsed = (durationMillis: number) => {
 const AFFIRMATION_CARD_WIDTH = Dimensions.get('window').width - 96;
 
 export default function RecordAffirmationsScreen() {
+  const { customAffirmations, loading: customLoading } = useCustomAffirmations();
+  const { loading: savedLoading, savedAffirmations } = useSavedAffirmations();
   const recordActionProgress = useRef(new Animated.Value(0)).current;
   const saveConfirmationProgress = useRef(new Animated.Value(0)).current;
   const affirmationCarouselRef = useRef<FlatList<CarouselItem> | null>(null);
   const currentAffirmationIndexRef = useRef(0);
   const saveConfirmationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [deviceSavedAffirmations, setDeviceSavedAffirmations] = useState<
-    Affirmation[]
-  >([]);
-  const [customAffirmations, setCustomAffirmations] = useState<Affirmation[]>([]);
   const [queuedAffirmations, setQueuedAffirmations] = useState<Affirmation[]>([]);
   const [showPicker, setShowPicker] = useState(false);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
@@ -148,23 +82,9 @@ export default function RecordAffirmationsScreen() {
   useEffect(() => {
     const bootstrapRecorder = async () => {
       try {
-        const [
-          storedSavedAffirmations,
-          storedCustomAffirmations,
-          storedQueuedAffirmations,
-        ] = await Promise.all([
-          AsyncStorage.getItem(STORAGE_KEYS.SAVED_AFFIRMATIONS),
-          AsyncStorage.getItem(STORAGE_KEYS.CUSTOM_AFFIRMATIONS),
+        const [storedQueuedAffirmations] = await Promise.all([
           AsyncStorage.getItem(STORAGE_KEYS.PRACTICE_AFFIRMATION_QUEUE),
         ]);
-
-        if (storedSavedAffirmations) {
-          setDeviceSavedAffirmations(
-            JSON.parse(storedSavedAffirmations) as Affirmation[]
-          );
-        }
-
-        setCustomAffirmations(normalizeCustomAffirmations(storedCustomAffirmations));
 
         if (storedQueuedAffirmations) {
           setQueuedAffirmations(JSON.parse(storedQueuedAffirmations) as Affirmation[]);
@@ -358,6 +278,11 @@ export default function RecordAffirmationsScreen() {
     setStatusMessage('Saving your recording in the app...');
 
     try {
+      const capturedDurationMillis = Math.max(
+        recorderState.durationMillis ?? 0,
+        Math.round((recorder.currentTime ?? 0) * 1000)
+      );
+
       await recorder.stop();
       const finalRecorderState = recorder.getStatus();
       const sourceUri = recorder.uri ?? finalRecorderState.url;
@@ -382,7 +307,10 @@ export default function RecordAffirmationsScreen() {
         id: createdAt,
         uri: destinationFile.uri,
         fileName,
-        durationMillis: finalRecorderState.durationMillis,
+        durationMillis: Math.max(
+          capturedDurationMillis,
+          finalRecorderState.durationMillis ?? 0
+        ),
         createdAt,
         affirmations: queuedAffirmations,
       };
@@ -452,7 +380,7 @@ export default function RecordAffirmationsScreen() {
     setCurrentAffirmationIndex(clampedIndex);
   };
 
-  const isLoading = isBootstrapping;
+  const isLoading = isBootstrapping || savedLoading || customLoading;
 
   return (
     <View style={styles.backdrop}>
@@ -622,7 +550,7 @@ export default function RecordAffirmationsScreen() {
           onGoToRecording={() => setShowPicker(false)}
           onToggleAffirmation={toggleQueuedAffirmation}
           queuedAffirmations={queuedAffirmations}
-          savedAffirmations={deviceSavedAffirmations}
+          savedAffirmations={savedAffirmations}
           visible={showPicker}
         />
 

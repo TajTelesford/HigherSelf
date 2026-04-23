@@ -1,4 +1,5 @@
 import CustomChooseAffirmationAlert from '@/components/CustomChooseAffirmationAlert';
+import { useCustomAffirmations } from '@/context/CustomAffirmationsContext';
 import { useSavedAffirmations } from '@/context/SavedAffirmationContext';
 import { STORAGE_KEYS } from '@/data/HigherSelf_StorageKeys';
 import type { Affirmation } from '@/types/affirmations';
@@ -18,72 +19,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 type PracticeStep = 'queue' | 'recording';
 
-type StoredAffirmationLike =
-  | string
-  | {
-      id?: string | number;
-      text?: string;
-      affirmation?: string;
-      category?: string;
-    };
-
 const getTodayKey = () => new Date().toISOString().slice(0, 10);
 
-const normalizeCustomAffirmations = (
-  value: string | null
-): Affirmation[] => {
-  if (!value) {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(value) as StoredAffirmationLike[];
-
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed
-      .map((item, index) => {
-        if (typeof item === 'string') {
-          const text = item.trim();
-
-          if (!text) {
-            return null;
-          }
-
-          return {
-            id: `custom-${index}-${text}`,
-            text,
-            category: 'custom',
-          } satisfies Affirmation;
-        }
-
-        const text = item.text?.trim() || item.affirmation?.trim();
-
-        if (!text) {
-          return null;
-        }
-
-        return {
-          id: String(item.id ?? `custom-${index}-${text}`),
-          text,
-          category: item.category ?? 'custom',
-        } satisfies Affirmation;
-      })
-      .filter((item): item is Affirmation => Boolean(item));
-  } catch (error) {
-    console.error('Failed to parse custom affirmations:', error);
-    return [];
-  }
-};
-
 export default function PracticeAffirmationsScreen() {
-  const { loading: savedLoading } = useSavedAffirmations();
-  const [deviceSavedAffirmations, setDeviceSavedAffirmations] = useState<
-    Affirmation[]
-  >([]);
-  const [customAffirmations, setCustomAffirmations] = useState<Affirmation[]>([]);
+  const { customAffirmations, loading: customLoading } = useCustomAffirmations();
+  const { loading: savedLoading, savedAffirmations } = useSavedAffirmations();
   const [queuedAffirmations, setQueuedAffirmations] = useState<Affirmation[]>([]);
   const [showPicker, setShowPicker] = useState(false);
   const [screenStep, setScreenStep] = useState<PracticeStep>('queue');
@@ -92,27 +32,10 @@ export default function PracticeAffirmationsScreen() {
   useEffect(() => {
     const bootstrapPracticeScreen = async () => {
       try {
-        const [
-          storedSavedAffirmations,
-          storedCustomAffirmations,
-          storedQueuedAffirmations,
-          storedPromptDate,
-        ] = await Promise.all([
-          AsyncStorage.getItem(STORAGE_KEYS.SAVED_AFFIRMATIONS),
-          AsyncStorage.getItem(STORAGE_KEYS.CUSTOM_AFFIRMATIONS),
+        const [storedQueuedAffirmations, storedPromptDate] = await Promise.all([
           AsyncStorage.getItem(STORAGE_KEYS.PRACTICE_AFFIRMATION_QUEUE),
           AsyncStorage.getItem(STORAGE_KEYS.PRACTICE_AFFIRMATION_PROMPT_DATE),
         ]);
-
-        if (storedSavedAffirmations) {
-          setDeviceSavedAffirmations(
-            JSON.parse(storedSavedAffirmations) as Affirmation[]
-          );
-        } else {
-          setDeviceSavedAffirmations([]);
-        }
-
-        setCustomAffirmations(normalizeCustomAffirmations(storedCustomAffirmations));
 
         if (storedQueuedAffirmations) {
           setQueuedAffirmations(JSON.parse(storedQueuedAffirmations) as Affirmation[]);
@@ -136,33 +59,6 @@ export default function PracticeAffirmationsScreen() {
 
     bootstrapPracticeScreen();
   }, []);
-
-  useEffect(() => {
-    if (!showPicker) {
-      return;
-    }
-
-    const loadSavedAffirmationsFromDevice = async () => {
-      try {
-        const storedSavedAffirmations = await AsyncStorage.getItem(
-          STORAGE_KEYS.SAVED_AFFIRMATIONS
-        );
-
-        if (storedSavedAffirmations) {
-          setDeviceSavedAffirmations(
-            JSON.parse(storedSavedAffirmations) as Affirmation[]
-          );
-          return;
-        }
-
-        setDeviceSavedAffirmations([]);
-      } catch (error) {
-        console.error('Failed to load saved affirmations from device:', error);
-      }
-    };
-
-    loadSavedAffirmationsFromDevice();
-  }, [showPicker]);
 
   useEffect(() => {
     if (isBootstrapping) {
@@ -210,7 +106,7 @@ export default function PracticeAffirmationsScreen() {
     router.push('/modals/recordAffirmations');
   };
 
-  const isLoading = savedLoading || isBootstrapping;
+  const isLoading = savedLoading || customLoading || isBootstrapping;
 
   return (
     <View style={styles.backdrop}>
@@ -363,7 +259,7 @@ export default function PracticeAffirmationsScreen() {
           onGoToRecording={openRecordingScreen}
           onToggleAffirmation={toggleQueuedAffirmation}
           queuedAffirmations={queuedAffirmations}
-          savedAffirmations={deviceSavedAffirmations}
+          savedAffirmations={savedAffirmations}
           visible={showPicker}
         />
       </SafeAreaView>

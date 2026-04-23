@@ -38,7 +38,13 @@ export function SavedAffirmationsProvider({
         );
 
         if (storedSavedAffirmations) {
-          setSavedAffirmations(JSON.parse(storedSavedAffirmations));
+          const parsed = JSON.parse(storedSavedAffirmations) as Affirmation[];
+          const hydrated = parsed.map((affirmation) => ({
+            ...affirmation,
+            savedAt: affirmation.savedAt ?? new Date().toISOString(),
+          }));
+
+          setSavedAffirmations(hydrated);
         }
       } catch (error) {
         console.error('Failed to load saved affirmations:', error);
@@ -78,7 +84,13 @@ export function SavedAffirmationsProvider({
         return prev.filter((a) => a.id !== affirmation.id);
       }
 
-      return [...prev, affirmation];
+      return [
+        ...prev,
+        {
+          ...affirmation,
+          savedAt: affirmation.savedAt ?? new Date().toISOString(),
+        },
+      ];
     });
   };
 

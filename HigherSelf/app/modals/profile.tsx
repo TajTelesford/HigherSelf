@@ -1,4 +1,4 @@
-import { MyContentCardDisplay } from '@/components/MyContentCardDisplay';
+import { LibraryContentCard } from '@/components/LibraryContentCard';
 import { ProfileCardTile } from '@/components/ProfileCardTile';
 import { UnlockAllCardSection } from '@/components/UnlockAllCardSection';
 import UserStreak from '@/components/UserStreak';
@@ -92,8 +92,7 @@ export default function ProfileScreen() {
               </View>
             ))}
           </View>
-
-            <MyContentCardDisplay />
+          <LibraryContentCard text="Jump into your saved content hub and manage everything from one place." />
 
         </ScrollView>
       </SafeAreaView>

@@ -1,9 +1,68 @@
 import { Ionicons } from '@expo/vector-icons';
+import { CollectionPickerAlert } from '@/components/CollectionPickerAlert';
+import { SavedAffirmationCard } from '@/components/SavedAffirmationCard';
+import { Text } from '@/components/ui/text';
+import { useAffirmationCollections } from '@/context/AffirmationCollectionsContext';
+import { useSavedAffirmations } from '@/context/SavedAffirmationContext';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import type { Affirmation } from '@/types/affirmations';
 
 export default function FavoritesScreen() {
+  const { savedAffirmations, loading } = useSavedAffirmations();
+  const { collections, isAffirmationInCollection, toggleAffirmationInCollection } =
+    useAffirmationCollections();
+  const [selectedAffirmation, setSelectedAffirmation] = useState<Affirmation | null>(
+    null
+  );
+
+  const bookmarkedAffirmationIds = useMemo(
+    () =>
+      new Set(
+        collections.flatMap((collection) =>
+          collection.affirmations.map((affirmation) => affirmation.id)
+        )
+      ),
+    [collections]
+  );
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <View style={styles.centerContent}>
+          <Text style={styles.message}>Loading saved affirmations...</Text>
+        </View>
+      );
+    }
+
+    if (savedAffirmations.length === 0) {
+      return (
+        <View style={styles.centerContent}>
+          <Text style={styles.message}>No saved affirmations yet.</Text>
+        </View>
+      );
+    }
+
+    return (
+      <FlatList
+        data={savedAffirmations}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <SavedAffirmationCard
+            affirmation={item}
+            bookmarked={bookmarkedAffirmationIds.has(item.id)}
+            onBookmarkPress={() => setSelectedAffirmation(item)}
+          />
+        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
+    );
+  };
+
   return (
     <View style={styles.backdrop}>
       <Pressable style={styles.dismissArea} onPress={() => router.back()} />
@@ -19,10 +78,19 @@ export default function FavoritesScreen() {
           </Pressable>
         </View>
 
-        <View style={styles.content}>
-          <Text style={styles.contentText}>Favorites</Text>
-        </View>
+        <View style={styles.content}>{renderContent()}</View>
       </SafeAreaView>
+
+      <CollectionPickerAlert
+        affirmation={selectedAffirmation}
+        collections={collections}
+        isAffirmationInCollection={isAffirmationInCollection}
+        isVisible={selectedAffirmation !== null}
+        onClose={() => setSelectedAffirmation(null)}
+        onToggleCollection={(collectionId, affirmation) =>
+          toggleAffirmationInCollection(collectionId, affirmation)
+        }
+      />
     </View>
   );
 }
@@ -76,12 +144,23 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    paddingTop: 24,
+  },
+  listContent: {
+    paddingBottom: 32,
+  },
+  separator: {
+    height: 12,
+  },
+  centerContent: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 24,
   },
-  contentText: {
+  message: {
     color: '#F5F7FA',
-    fontSize: 22,
-    fontWeight: '600',
+    fontSize: 18,
+    textAlign: 'center',
   },
 });

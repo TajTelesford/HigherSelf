@@ -23,8 +23,8 @@ export default function FloatingActionButtons() {
       />
 
       <HomeScreenButton
-        icon="compass-outline"
-        onPress={() => router.push('/modals/explore')}
+        icon="library-outline"
+        onPress={() => router.push('/modals/library')}
         style={styles.bottomLeft}
         variant="glass"
       />
