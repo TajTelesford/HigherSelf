@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from '@expo/vector-icons';
 import { MoodCalendar } from '@/components/MoodCalendar';
 import { MoodPicker, type MoodOption } from '@/components/MoodPicker';
+import { TodaysMood } from '@/components/TodaysMood';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -129,36 +130,7 @@ export default function MoodScreen() {
               contentContainerStyle={styles.historyContent}
               showsVerticalScrollIndicator={false}
             >
-              <View style={styles.todayMoodCard}>
-                <Text style={styles.sectionLabel}>Today&apos;s mood</Text>
-
-                <View style={styles.todayMoodRow}>
-                  <View
-                    style={[
-                      styles.todayMoodIcon,
-                      { backgroundColor: `${selectedMood?.accent ?? '#9CA3AF'}26` },
-                    ]}
-                  >
-                    <Ionicons
-                      color={selectedMood?.accent ?? '#9CA3AF'}
-                      name={selectedMood?.icon ?? 'help-circle-outline'}
-                      size={34}
-                    />
-                  </View>
-
-                  <View style={styles.todayMoodTextWrap}>
-                    <Text style={styles.todayMoodLabel}>{selectedMood?.label}</Text>
-                    <Text style={styles.todayMoodDescription}>
-                      Saved for {new Date().toLocaleDateString(undefined, {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
+              <TodaysMood mood={selectedMood} />
               <MoodCalendar moodOptions={MOOD_OPTIONS} moodsByDate={moodsByDate} />
             </ScrollView>
           )}
@@ -240,47 +212,5 @@ const styles = StyleSheet.create({
   historyContent: {
     paddingBottom: 24,
     gap: 18,
-  },
-  todayMoodCard: {
-    borderRadius: 18,
-    paddingHorizontal: 16,
-    paddingVertical: 18,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  sectionLabel: {
-    color: '#C6CDD8',
-    fontSize: 14,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 14,
-  },
-  todayMoodRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-  },
-  todayMoodIcon: {
-    width: 72,
-    height: 72,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  todayMoodTextWrap: {
-    flex: 1,
-  },
-  todayMoodLabel: {
-    color: '#F5F7FA',
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  todayMoodDescription: {
-    color: '#D9E1EC',
-    fontSize: 15,
-    lineHeight: 22,
   },
 });
