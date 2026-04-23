@@ -8,14 +8,12 @@ import {
   RecordingPresets,
   requestRecordingPermissionsAsync,
   setAudioModeAsync,
-  useAudioPlayer,
-  useAudioPlayerStatus,
   useAudioRecorder,
   useAudioRecorderState,
 } from 'expo-audio';
 import { Directory, File, Paths } from 'expo-file-system';
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -51,6 +49,17 @@ type VoiceRecordingEntry = {
   createdAt: string;
   affirmations: Affirmation[];
 };
+
+type CarouselItem =
+  | {
+      type: 'affirmation';
+      id: string;
+      affirmation: Affirmation;
+    }
+  | {
+      type: 'completion';
+      id: 'completion-sentinel';
+    };
 
 const normalizeCustomAffirmations = (
   value: string | null
@@ -111,18 +120,14 @@ const formatElapsed = (durationMillis: number) => {
   return `${minutes}:${seconds}`;
 };
 
-const formatSessionDate = (isoDate: string) =>
-  new Date(isoDate).toLocaleDateString(undefined, {
-    month: 'short',
-    day: '2-digit',
-  });
-
-const AFFIRMATION_CARD_WIDTH = Dimensions.get('window').width - 84;
+const AFFIRMATION_CARD_WIDTH = Dimensions.get('window').width - 96;
 
 export default function RecordAffirmationsScreen() {
   const recordActionProgress = useRef(new Animated.Value(0)).current;
-  const affirmationCarouselRef = useRef<FlatList<Affirmation> | null>(null);
+  const saveConfirmationProgress = useRef(new Animated.Value(0)).current;
+  const affirmationCarouselRef = useRef<FlatList<CarouselItem> | null>(null);
   const currentAffirmationIndexRef = useRef(0);
+  const saveConfirmationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [deviceSavedAffirmations, setDeviceSavedAffirmations] = useState<
     Affirmation[]
   >([]);
@@ -131,18 +136,14 @@ export default function RecordAffirmationsScreen() {
   const [showPicker, setShowPicker] = useState(false);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [isWorking, setIsWorking] = useState(false);
-  const [pendingPlaybackStart, setPendingPlaybackStart] = useState(false);
   const [currentAffirmationIndex, setCurrentAffirmationIndex] = useState(0);
+  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const [statusMessage, setStatusMessage] = useState(
     'Tap the mic to start recording in your own voice.'
   );
-  const [lastSavedRecording, setLastSavedRecording] =
-    useState<VoiceRecordingEntry | null>(null);
 
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder, 100);
-  const player = useAudioPlayer();
-  const playerStatus = useAudioPlayerStatus(player);
 
   useEffect(() => {
     const bootstrapRecorder = async () => {
@@ -151,12 +152,10 @@ export default function RecordAffirmationsScreen() {
           storedSavedAffirmations,
           storedCustomAffirmations,
           storedQueuedAffirmations,
-          storedVoiceRecordings,
         ] = await Promise.all([
           AsyncStorage.getItem(STORAGE_KEYS.SAVED_AFFIRMATIONS),
           AsyncStorage.getItem(STORAGE_KEYS.CUSTOM_AFFIRMATIONS),
           AsyncStorage.getItem(STORAGE_KEYS.PRACTICE_AFFIRMATION_QUEUE),
-          AsyncStorage.getItem(STORAGE_KEYS.VOICE_RECORDINGS),
         ]);
 
         if (storedSavedAffirmations) {
@@ -169,11 +168,6 @@ export default function RecordAffirmationsScreen() {
 
         if (storedQueuedAffirmations) {
           setQueuedAffirmations(JSON.parse(storedQueuedAffirmations) as Affirmation[]);
-        }
-
-        if (storedVoiceRecordings) {
-          const parsed = JSON.parse(storedVoiceRecordings) as VoiceRecordingEntry[];
-          setLastSavedRecording(parsed[0] ?? null);
         }
       } catch (error) {
         console.error('Failed to load record affirmations state:', error);
@@ -206,32 +200,37 @@ export default function RecordAffirmationsScreen() {
   }, [isBootstrapping, queuedAffirmations]);
 
   useEffect(() => {
-    if (!playerStatus.isLoaded || !playerStatus.didJustFinish) {
+    if (!showSaveConfirmation) {
       return;
     }
 
-    player.seekTo(0).catch((error: unknown) => {
-      console.error('Failed to reset playback position:', error);
-    });
-  }, [player, playerStatus.didJustFinish, playerStatus.isLoaded]);
+    Animated.timing(saveConfirmationProgress, {
+      toValue: 1,
+      duration: 260,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
 
-  useEffect(() => {
-    if (!lastSavedRecording) {
-      return;
-    }
+    saveConfirmationTimeoutRef.current = setTimeout(() => {
+      Animated.timing(saveConfirmationProgress, {
+        toValue: 0,
+        duration: 220,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished) {
+          setShowSaveConfirmation(false);
+        }
+      });
+    }, 2400);
 
-    player.replace({ uri: lastSavedRecording.uri });
-    setPendingPlaybackStart(false);
-  }, [lastSavedRecording, player]);
-
-  useEffect(() => {
-    if (!pendingPlaybackStart || !playerStatus.isLoaded) {
-      return;
-    }
-
-    player.play();
-    setPendingPlaybackStart(false);
-  }, [pendingPlaybackStart, player, playerStatus.isLoaded]);
+    return () => {
+      if (saveConfirmationTimeoutRef.current) {
+        clearTimeout(saveConfirmationTimeoutRef.current);
+        saveConfirmationTimeoutRef.current = null;
+      }
+    };
+  }, [saveConfirmationProgress, showSaveConfirmation]);
 
   useEffect(() => {
     Animated.timing(recordActionProgress, {
@@ -241,12 +240,6 @@ export default function RecordAffirmationsScreen() {
       useNativeDriver: false,
     }).start();
   }, [recordActionProgress, recorderState.isRecording]);
-
-  const playbackDurationMs = Math.round(playerStatus.duration * 1000);
-  const playbackPositionMs = Math.round(playerStatus.currentTime * 1000);
-  const playbackProgress = playbackDurationMs
-    ? Math.min(1, playbackPositionMs / playbackDurationMs)
-    : 0;
   const recordButtonShift = recordActionProgress.interpolate({
     inputRange: [0, 1],
     outputRange: [0, -54],
@@ -263,8 +256,19 @@ export default function RecordAffirmationsScreen() {
     inputRange: [0, 1],
     outputRange: [0, 14],
   });
-  const activeAffirmation =
-    queuedAffirmations[currentAffirmationIndex] ?? queuedAffirmations[0] ?? null;
+  const carouselItems = useMemo<CarouselItem[]>(
+    () => [
+      ...queuedAffirmations.map((affirmation) => ({
+        type: 'affirmation' as const,
+        id: affirmation.id,
+        affirmation,
+      })),
+      ...(recorderState.isRecording && queuedAffirmations.length
+        ? [{ type: 'completion' as const, id: 'completion-sentinel' as const }]
+        : []),
+    ],
+    [queuedAffirmations, recorderState.isRecording]
+  );
 
   useEffect(() => {
     if (!queuedAffirmations.length) {
@@ -308,20 +312,6 @@ export default function RecordAffirmationsScreen() {
       STORAGE_KEYS.VOICE_RECORDINGS,
       JSON.stringify(updated)
     );
-    setLastSavedRecording(entry);
-  };
-
-  const stopPlayback = async () => {
-    if (!playerStatus.isLoaded) {
-      return;
-    }
-
-    try {
-      player.pause();
-      await player.seekTo(0);
-    } catch (error) {
-      console.error('Failed to stop playback:', error);
-    }
   };
 
   const startRecording = async () => {
@@ -333,8 +323,6 @@ export default function RecordAffirmationsScreen() {
     setStatusMessage('Requesting microphone access...');
 
     try {
-      await stopPlayback();
-
       const permission = await requestRecordingPermissionsAsync();
 
       if (!permission.granted) {
@@ -367,7 +355,7 @@ export default function RecordAffirmationsScreen() {
     }
 
     setIsWorking(true);
-    setStatusMessage('Saving your recording to this device...');
+    setStatusMessage('Saving your recording in the app...');
 
     try {
       await recorder.stop();
@@ -400,7 +388,8 @@ export default function RecordAffirmationsScreen() {
       };
 
       await saveRecordingMetadata(entry);
-      setStatusMessage('Saved to your device. Tap again anytime for another take.');
+      setStatusMessage('Saved in the app. Tap again anytime for another take.');
+      setShowSaveConfirmation(true);
     } catch (error) {
       console.error('Failed to save recording:', error);
       setStatusMessage('We could not save that take. Please try again.');
@@ -427,46 +416,6 @@ export default function RecordAffirmationsScreen() {
     await startRecording();
   };
 
-  const handlePlaybackPress = async () => {
-    if (!lastSavedRecording || recorderState.isRecording || isWorking) {
-      return;
-    }
-
-    try {
-      await setAudioModeAsync({
-        allowsRecording: false,
-        playsInSilentMode: true,
-        interruptionMode: 'doNotMix',
-        shouldPlayInBackground: false,
-        shouldRouteThroughEarpiece: false,
-      });
-
-      if (!playerStatus.isLoaded) {
-        player.replace({ uri: lastSavedRecording.uri });
-        setPendingPlaybackStart(true);
-        return;
-      }
-
-      if (playerStatus.playing) {
-        player.pause();
-        return;
-      }
-
-      if (
-        playerStatus.didJustFinish ||
-        (playerStatus.duration > 0 &&
-          playerStatus.currentTime >= playerStatus.duration - 0.05)
-      ) {
-        await player.seekTo(0);
-      }
-
-      player.play();
-    } catch (error) {
-      console.error('Failed to play recording:', error);
-      setStatusMessage('Playback could not start. Please try again.');
-    }
-  };
-
   const handleAffirmationSwipeEnd = async (
     event: NativeSyntheticEvent<NativeScrollEvent>
   ) => {
@@ -479,21 +428,28 @@ export default function RecordAffirmationsScreen() {
     const nextIndex = Math.round(event.nativeEvent.contentOffset.x / cardWidth);
     const clampedIndex = Math.max(
       0,
-      Math.min(nextIndex, queuedAffirmations.length - 1)
+      Math.min(nextIndex, carouselItems.length - 1)
     );
     const previousIndex = currentAffirmationIndexRef.current;
 
+    if (recorderState.isRecording && clampedIndex < previousIndex) {
+      affirmationCarouselRef.current?.scrollToIndex({
+        index: previousIndex,
+        animated: true,
+      });
+      return;
+    }
+
+    if (recorderState.isRecording && clampedIndex === queuedAffirmations.length) {
+      const lastAffirmationIndex = Math.max(queuedAffirmations.length - 1, 0);
+      currentAffirmationIndexRef.current = lastAffirmationIndex;
+      setCurrentAffirmationIndex(lastAffirmationIndex);
+      await stopRecording();
+      return;
+    }
+
     currentAffirmationIndexRef.current = clampedIndex;
     setCurrentAffirmationIndex(clampedIndex);
-
-    if (
-      recorderState.isRecording &&
-      queuedAffirmations.length > 1 &&
-      clampedIndex === queuedAffirmations.length - 1 &&
-      previousIndex !== clampedIndex
-    ) {
-      await stopRecording();
-    }
   };
 
   const isLoading = isBootstrapping;
@@ -523,7 +479,14 @@ export default function RecordAffirmationsScreen() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.heroCard}>
-              <Text style={styles.heroEyebrow}>Your Voice</Text>
+              <View style={styles.heroTopRow}>
+                <Text style={styles.heroEyebrow}>Your Voice</Text>
+
+                <Pressable onPress={() => setShowPicker(true)} style={styles.editQueueButton}>
+                  <Ionicons color="#D8CCFF" name="sparkles" size={16} />
+                  <Text style={styles.editQueueButtonText}>Edit Queue</Text>
+                </Pressable>
+              </View>
               <Text style={styles.heroTitle}>Speak your affirmations with conviction.</Text>
               <Text style={styles.heroCopy}>{statusMessage}</Text>
 
@@ -539,7 +502,7 @@ export default function RecordAffirmationsScreen() {
                   <FlatList
                     ref={affirmationCarouselRef}
                     contentContainerStyle={styles.carouselListContent}
-                    data={queuedAffirmations}
+                    data={carouselItems}
                     horizontal
                     keyExtractor={(item) => item.id}
                     getItemLayout={(_, index) => ({
@@ -551,54 +514,58 @@ export default function RecordAffirmationsScreen() {
                     pagingEnabled
                     renderItem={({ index, item }) => (
                       <View style={styles.affirmationCardFrame}>
-                        <View
-                          style={[
-                            styles.affirmationCard,
-                            index === currentAffirmationIndex && styles.affirmationCardActive,
-                          ]}
-                        >
-                          <View style={styles.affirmationCardGlowPrimary} />
-                          <View style={styles.affirmationCardGlowAccent} />
-                          <View style={styles.affirmationCardNoise} />
+                        {item.type === 'completion' ? (
+                          <View style={styles.affirmationCompletionCard} />
+                        ) : (
+                          <View
+                            style={[
+                              styles.affirmationCard,
+                              index === currentAffirmationIndex &&
+                                styles.affirmationCardActive,
+                            ]}
+                          >
+                            <View style={styles.affirmationCardGlowPrimary} />
+                            <View style={styles.affirmationCardGlowAccent} />
+                            <View style={styles.affirmationCardNoise} />
 
-                          <View style={styles.affirmationCardTopRow}>
-                            <View style={styles.affirmationQuoteBadge}>
-                              <FontAwesome name="quote-left" size={18} color="white" />
+                            <View style={styles.affirmationCardTopRow}>
+                              <View style={styles.affirmationQuoteBadge}>
+                                <FontAwesome name="quote-left" size={18} color="white" />
+                              </View>
                             </View>
-                            <View style={styles.affirmationArrowBadge}>
-                              <Ionicons
-                                color="#F5F7FA"
-                                name="chevron-forward"
-                                size={16}
-                              />
-                            </View>
-                          </View>
 
-                          <Text style={styles.affirmationCardText}>{item.text}</Text>
-
-                          <View style={styles.affirmationCardBottomRow}>
-                            <Text style={styles.affirmationCardCategory}>
-                              {item.category ? item.category.replace(/^\w/, (char) => char.toUpperCase()) : 'Affirmation'}
+                            <Text style={styles.affirmationCardText}>
+                              {item.affirmation.text}
                             </Text>
 
-                            <View style={styles.affirmationHeartBadge}>
-                              <FontAwesome name="quote-right" size={18} color="white" />
+                            <View style={styles.affirmationCardBottomRow}>
+                              <Text style={styles.affirmationCardCategory}>
+                                {item.affirmation.category
+                                  ? item.affirmation.category.replace(
+                                      /^\w/,
+                                      (char) => char.toUpperCase()
+                                    )
+                                  : 'Affirmation'}
+                              </Text>
+
+                              <View style={styles.affirmationHeartBadge}>
+                                <FontAwesome name="quote-right" size={18} color="white" />
+                              </View>
                             </View>
                           </View>
-                        </View>
+                        )}
                       </View>
                     )}
                     scrollEnabled={!isWorking && queuedAffirmations.length > 1}
                     showsHorizontalScrollIndicator={false}
                     snapToAlignment="center"
+                    style={styles.carouselList}
                   />
 
                   <Text style={styles.carouselHint}>
                     {recorderState.isRecording
-                      ? 'Swipe through each affirmation. Reaching the final card ends the take.'
-                      : activeAffirmation
-                        ? `Start from: "${activeAffirmation.text}"`
-                        : 'Swipe to preview your affirmations.'}
+                      ? 'Swipe forward through each affirmation. Swiping past the last card ends the take.'
+                      : 'Swipe to preview your affirmations.'}
                   </Text>
                 </View>
               ) : (
@@ -646,63 +613,8 @@ export default function RecordAffirmationsScreen() {
                     ? 'Tap to stop and save'
                     : 'Tap to begin recording'}
                 </Text>
-
-                <Pressable onPress={() => setShowPicker(true)} style={styles.editQueueButton}>
-                  <Ionicons color="#D8CCFF" name="sparkles" size={16} />
-                  <Text style={styles.editQueueButtonText}>Edit Queue</Text>
-                </Pressable>
               </View>
             </View>
-
-            {lastSavedRecording ? (
-              <View style={styles.savedCard}>
-                <Text style={styles.savedLabel}>Saved To Device</Text>
-                <Text style={styles.savedFileName}>{lastSavedRecording.fileName}</Text>
-                <Text style={styles.savedMeta}>
-                  {formatElapsed(lastSavedRecording.durationMillis)} recorded on{' '}
-                  {formatSessionDate(lastSavedRecording.createdAt)}
-                </Text>
-                <View style={styles.playbackRow}>
-                  <Pressable
-                    disabled={recorderState.isRecording || isWorking}
-                    onPress={handlePlaybackPress}
-                    style={({ pressed }) => [
-                      styles.playbackButton,
-                      pressed &&
-                        !recorderState.isRecording &&
-                        !isWorking &&
-                        styles.playbackButtonPressed,
-                      (recorderState.isRecording || isWorking) &&
-                        styles.playbackButtonDisabled,
-                    ]}
-                  >
-                    <Ionicons
-                      color="#F5F7FA"
-                      name={playerStatus.playing ? 'pause' : 'play'}
-                      size={18}
-                    />
-                    <Text style={styles.playbackButtonText}>
-                      {playerStatus.playing ? 'Pause Replay' : 'Replay Recording'}
-                    </Text>
-                  </Pressable>
-
-                  <Text style={styles.playbackTime}>
-                    {formatElapsed(playbackPositionMs)} /{' '}
-                    {formatElapsed(
-                      playbackDurationMs || lastSavedRecording.durationMillis
-                    )}
-                  </Text>
-                </View>
-                <View style={styles.playbackTrack}>
-                  <View
-                    style={[
-                      styles.playbackFill,
-                      { width: `${Math.max(6, playbackProgress * 100)}%` },
-                    ]}
-                  />
-                </View>
-              </View>
-            ) : null}
           </ScrollView>
         )}
 
@@ -715,6 +627,36 @@ export default function RecordAffirmationsScreen() {
           savedAffirmations={deviceSavedAffirmations}
           visible={showPicker}
         />
+
+        {showSaveConfirmation ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.saveConfirmationSheet,
+              {
+                opacity: saveConfirmationProgress,
+                transform: [
+                  {
+                    translateY: saveConfirmationProgress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [120, 0],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
+            <View style={styles.saveConfirmationIconWrap}>
+              <Ionicons color="#F5F7FA" name="checkmark" size={22} />
+            </View>
+            <View style={styles.saveConfirmationCopy}>
+              <Text style={styles.saveConfirmationTitle}>Recording Saved</Text>
+              <Text style={styles.saveConfirmationText}>
+                Your affirmation recording is now saved in the app.
+              </Text>
+            </View>
+          </Animated.View>
+        ) : null}
       </SafeAreaView>
     </View>
   );
@@ -796,6 +738,12 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1.1,
   },
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
   heroTitle: {
     color: '#F5F7FA',
     fontSize: 28,
@@ -838,9 +786,11 @@ const styles = StyleSheet.create({
   },
   affirmationCardFrame: {
     width: AFFIRMATION_CARD_WIDTH,
+    alignItems: 'center',
   },
   affirmationCard: {
-    minHeight: 208,
+    width: '100%',
+    height: 300,
     borderRadius: 30,
     paddingHorizontal: 28,
     paddingVertical: 26,
@@ -855,8 +805,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     overflow: 'hidden',
   },
+  affirmationCompletionCard: {
+    width: '100%',
+    height: 300,
+    opacity: 0,
+  },
   carouselListContent: {
     paddingHorizontal: 6,
+  },
+  carouselList: {
+    alignSelf: 'center',
   },
   affirmationCardActive: {
     borderColor: 'rgba(245, 224, 255, 0.34)',
@@ -904,14 +862,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(137, 92, 246, 0.22)',
     borderWidth: 1,
     borderColor: 'rgba(232, 219, 255, 0.18)',
-  },
-  affirmationArrowBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   affirmationCardText: {
     color: '#F5F7FA',
@@ -1024,76 +974,46 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  savedCard: {
+  saveConfirmationSheet: {
+    position: 'absolute',
+    right: 20,
+    bottom: 24,
+    left: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
     borderRadius: 24,
-    padding: 18,
-    backgroundColor: 'rgba(16, 25, 44, 0.96)',
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    backgroundColor: 'rgba(12, 18, 32, 0.98)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(167, 139, 250, 0.22)',
+    shadowColor: '#000',
+    shadowOpacity: 0.28,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 16,
   },
-  savedLabel: {
-    color: '#A78BFA',
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+  saveConfirmationIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#7C3AED',
   },
-  savedFileName: {
+  saveConfirmationCopy: {
+    flex: 1,
+    gap: 4,
+  },
+  saveConfirmationTitle: {
     color: '#F5F7FA',
     fontSize: 16,
     fontWeight: '700',
-    marginTop: 8,
   },
-  savedMeta: {
-    color: '#A7B1C5',
-    fontSize: 14,
-    marginTop: 8,
-  },
-  playbackRow: {
-    marginTop: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  playbackButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderRadius: 999,
-    backgroundColor: 'rgba(139, 92, 246, 0.16)',
-    borderWidth: 1,
-    borderColor: 'rgba(167, 139, 250, 0.2)',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  playbackButtonPressed: {
-    transform: [{ scale: 0.98 }],
-  },
-  playbackButtonDisabled: {
-    opacity: 0.55,
-  },
-  playbackButtonText: {
-    color: '#F5F7FA',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  playbackTime: {
+  saveConfirmationText: {
     color: '#C7D1E0',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  playbackTrack: {
-    width: '100%',
-    height: 8,
-    borderRadius: 999,
-    marginTop: 14,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    overflow: 'hidden',
-  },
-  playbackFill: {
-    height: '100%',
-    borderRadius: 999,
-    backgroundColor: '#A855F7',
+    fontSize: 14,
+    lineHeight: 20,
   },
 });
