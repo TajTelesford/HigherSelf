@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
-import { MyContentCard } from './MyContentCard';
+import { MyContentCard, type MyContentCardProps } from './MyContentCard';
 
-const CONTENT_ROWS = [
+const CONTENT_ROWS: MyContentCardProps[][] = [
   [
     {
       title: 'Favorites',

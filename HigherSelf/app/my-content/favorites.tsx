@@ -1,9 +1,10 @@
+import { MyContentScreenHeader } from '@/components/MyContentScreenHeader';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function FavoritesScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Favorites</Text>
+      <MyContentScreenHeader title="Favorites" />
       <Text style={styles.body}>Your saved content will live here.</Text>
     </View>
   );
@@ -15,12 +16,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0B0F1A',
     paddingHorizontal: 24,
     paddingTop: 100,
-  },
-  title: {
-    color: '#F5F7FA',
-    fontSize: 30,
-    fontWeight: '700',
-    marginBottom: 12,
   },
   body: {
     color: 'rgba(245, 247, 250, 0.72)',

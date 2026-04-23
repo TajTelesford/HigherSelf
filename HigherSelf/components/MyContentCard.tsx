@@ -1,10 +1,10 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-type MyContentCardProps = {
+export type MyContentCardProps = {
   title: string;
-  href: string;
+  href: Href;
   icon:
     | {
         family: 'ionicons';
@@ -27,7 +27,7 @@ function CardIcon({ icon }: { icon: MyContentCardProps['icon'] }) {
 export function MyContentCard({ title, href, icon }: MyContentCardProps) {
   return (
     <Pressable
-      onPress={() => router.push(`/?${href}`)}
+      onPress={() => router.push(href)}
       style={styles.card}
     >
       <View style={styles.contentRow}>
