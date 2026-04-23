@@ -8,8 +8,8 @@ import {
   useWindowDimensions,
 } from 'react-native';
 
-import { useThemeSelection } from '@/context/ThemeContextProvider';
-import { AFFIRMATIONS } from '@/data/affirmation';
+import { useThemeSelection } from '../../context/ThemeContextProvider';
+import { AFFIRMATIONS } from '../../data/affirmation';
 
 export default function HomeScreen() {
   const { height } = useWindowDimensions();
