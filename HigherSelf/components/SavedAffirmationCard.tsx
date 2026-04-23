@@ -39,7 +39,7 @@ export function SavedAffirmationCard({
 }: SavedAffirmationCardProps) {
   const { isSaved, toggleSaved } = useSavedAffirmations();
   const saved = isSaved(affirmation.id);
-  const savedDate = formatSavedDate(affirmation.savedAt);
+  const savedDate = formatSavedDate(affirmation.savedAt ?? affirmation.createdAt);
 
   return (
     <View style={styles.card}>

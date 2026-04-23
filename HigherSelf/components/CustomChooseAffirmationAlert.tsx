@@ -60,11 +60,13 @@ export default function CustomChooseAffirmationAlert({
 
   const renderAffirmationCard = ({ item }: { item: Affirmation }) => {
     const selected = queuedIds.has(item.id);
+    const isCustomTab = activeTab === 'custom';
 
     return (
       <View
         style={[
           styles.affirmationCard,
+          isCustomTab && styles.affirmationCardCustom,
           selected && styles.affirmationCardSelected,
         ]}
       >
@@ -301,6 +303,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#141A26',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.06)',
+  },
+  affirmationCardCustom: {
+    borderColor: '#F4C95D',
+    borderWidth: 1.5,
   },
   affirmationCardSelected: {
     borderColor: '#F4C95D',
