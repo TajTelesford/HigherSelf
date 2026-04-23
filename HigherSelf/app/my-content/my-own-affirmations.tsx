@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     color: '#F5F7FA',
-    fontSize: 26,
+    fontSize: 16,
     fontWeight: '700',
   },
   sortPill: {
