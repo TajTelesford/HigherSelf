@@ -1,4 +1,4 @@
-
+import { colors } from '@/assets/theme/colors';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -14,20 +14,22 @@ export const ProfileCardTile = ({ title, icon, onPress }: ProfileCard) => {
   return (
     <Pressable
       onPress={onPress}
-      style={styles.tile}
+      style={[styles.tile, styles.tilePressed]}
     >
       <View style={styles.tileArt}>
-        <MaterialCommunityIcons color="#F2E9E4" name={icon} size={70} />
+        <View style={styles.iconBadge}>
+          <MaterialCommunityIcons color={colors.accent.gold} name={icon} size={64} />
+        </View>
         <Ionicons
           name="sparkles"
-          size={15}
-          color="rgba(242, 233, 228, 0.92)"
+          size={14}
+          color="rgba(242, 201, 76, 0.9)"
           style={styles.tileSparkleOne}
         />
         <Ionicons
           name="sparkles"
-          size={15}
-          color="rgba(242, 233, 228, 0.68)"
+          size={14}
+          color="rgba(139, 124, 255, 0.9)"
           style={styles.tileSparkleTwo}
         />
       </View>
@@ -35,50 +37,61 @@ export const ProfileCardTile = ({ title, icon, onPress }: ProfileCard) => {
       <Text style={styles.tileTitle}>{title}</Text>
     </Pressable>
   );
-}
+};
 
 
 const styles = StyleSheet.create({
- 
-  title: {
-    color: '#F5F7FA',
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 18,
-  },
   tile: {
-    width: '48%',
-    height: 200,
+    width: '50%',
+    minHeight: 100,
     borderRadius: 28,
-    backgroundColor: '#28375f',
-    paddingHorizontal: 18,
-    paddingVertical: 18,
-    justifyContent: 'space-between',
+    backgroundColor: 'rgba(242, 201, 76, 0.08)',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(242, 201, 76, 0.22)',
+    overflow: 'hidden',
+  },
+  tilePressed: {
+    opacity: 0.82,
+    transform: [{ scale: 0.98 }],
   },
   tileArt: {
-    height: 142,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    marginBottom: 10,
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+  iconBadge: {
+    width: '100%',
+    height: 178,
+    borderRadius: 30,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tileSparkleOne: {
     position: 'absolute',
-    top: 14,
-    left: 14,
+    top: 8,
+    left: 20,
   },
   tileSparkleTwo: {
     position: 'absolute',
-    top: 30,
-    right: 18,
+    top: 18,
+    right: 24,
   },
   tileTitle: {
-    color: '#F2E9E4',
-    fontSize:20,
-    fontWeight: '400',
-    lineHeight: 0,
+    color: colors.text.primary,
+    fontSize: 21,
+    fontWeight: '300',
+    lineHeight: 27,
     position: 'absolute',
-    bottom: 18,
-    left: 18,
+    left: 22,
+    right: 22,
+    bottom: 22,
   },
 });
