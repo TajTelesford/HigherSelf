@@ -50,6 +50,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.22)',
     paddingHorizontal: 28,
     paddingVertical: 24,
   },
@@ -63,7 +65,7 @@ const styles = StyleSheet.create({
   },
   cardDivider: {
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.22)',
   },
   textBlock: {
     flex: 1,
