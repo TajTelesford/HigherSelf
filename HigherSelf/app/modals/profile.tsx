@@ -1,3 +1,4 @@
+import { MyContentCardDisplay } from '@/components/MyContentCardDisplay';
 import { ProfileCardTile } from '@/components/ProfileCardTile';
 import { UnlockAllCardSection } from '@/components/UnlockAllCardSection';
 import UserStreak from '@/components/UserStreak';
@@ -91,6 +92,9 @@ export default function ProfileScreen() {
               </View>
             ))}
           </View>
+
+            <MyContentCardDisplay />
+
         </ScrollView>
       </SafeAreaView>
     </View>
