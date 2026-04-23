@@ -1,13 +1,13 @@
-import { Ionicons } from '@expo/vector-icons';
 import { CollectionPickerAlert } from '@/components/CollectionPickerAlert';
 import { SavedAffirmationCard } from '@/components/SavedAffirmationCard';
 import { Text } from '@/components/ui/text';
 import { useAffirmationCollections } from '@/context/AffirmationCollectionsContext';
+import type { Affirmation } from '@/types/affirmations';
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { Affirmation } from '@/types/affirmations';
 
 export default function CollectionDetailScreen() {
   const { collectionId } = useLocalSearchParams<{ collectionId?: string }>();
@@ -143,9 +143,7 @@ export default function CollectionDetailScreen() {
           ) : null}
         </View>
 
-        <Pressable accessibilityRole="button" style={styles.feedButton}>
-          <Text style={styles.feedButtonText}>Show all in feed</Text>
-        </Pressable>
+      
 
         <View style={styles.content}>{renderContent()}</View>
       </SafeAreaView>
