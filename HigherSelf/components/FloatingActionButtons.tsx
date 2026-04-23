@@ -1,5 +1,5 @@
 import HomeScreenButton from '@/components/HomeScreenButton';
-import RecoridngHomesScreeButton from '@/components/RecoridngHomesScreeButton';
+import RecoridngHomesScreeButton from '@/components/RecoridngHomesScreenButton';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 

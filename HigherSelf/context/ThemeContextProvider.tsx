@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 
-import { THEMES } from '@/data/themes';
+import { THEMES } from '../data/themes';
 
 type ThemeContextType = {
   selectedThemeId: string;

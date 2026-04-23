@@ -3,9 +3,9 @@ import { Stack } from 'expo-router';
 import 'react-native-reanimated';
 import '../global.css';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { SavedAffirmationsProvider } from '@/context/SavedAffirmationContext';
-import { ThemeContextProvider } from '@/context/ThemeContextProvider';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { ThemeContextProvider } from '../context/ThemeContextProvider';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -69,6 +69,13 @@ export default function RootLayout() {
             />
             <Stack.Screen
               name="modals/practiceAffirmations"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="modals/recordAffirmations"
               options={{
                 presentation: 'transparentModal',
                 animation: 'slide_from_bottom',
