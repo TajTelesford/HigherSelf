@@ -59,7 +59,7 @@ export default function RootLayout() {
                   }}
                 />
                 <Stack.Screen
-                  name="modals/explore"
+                  name="modals/library"
                   options={{
                     presentation: 'transparentModal',
                     animation: 'slide_from_bottom',
