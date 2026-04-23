@@ -779,8 +779,8 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.06)',
   },
   affirmationCardSelected: {
-    backgroundColor: 'rgba(139, 92, 246, 0.16)',
-    borderColor: 'rgba(167, 139, 250, 0.5)',
+    borderColor: '#F4C95D',
+    borderWidth: 1.5,
   },
   affirmationCardText: {
     flex: 1,
