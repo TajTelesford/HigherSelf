@@ -30,7 +30,7 @@ export default function RecoridngHomesScreeButton({
 
           <View style={styles.content}>
             <MaterialCommunityIcons
-              name="meditation"
+              name="microphone"
               size={34}
               color="#F5F7FA"
               style={styles.icon}

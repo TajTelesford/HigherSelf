@@ -37,8 +37,8 @@ export default function FloatingActionButtons() {
       />
 
       <RecoridngHomesScreeButton
-        label="Practice"
-        onPress={() => router.push('/modals/practiceAffirmations')}
+        label="Record"
+        onPress={() => router.push('/modals/recordAffirmations')}
         style={styles.bottomCenter}
       />
     </View>
