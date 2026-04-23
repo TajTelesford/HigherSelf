@@ -74,13 +74,6 @@ export default function RootLayout() {
                 animation: 'slide_from_bottom',
               }}
             />
-            <Stack.Screen
-              name="modals/recordAffirmations"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-            />
 
             <Stack.Screen
               name="my-content/collections"
