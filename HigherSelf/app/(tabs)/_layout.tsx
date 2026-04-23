@@ -13,6 +13,7 @@ export default function TabsLayout() {
         tabBarActiveTintColor: '#8B7CFF',
         tabBarInactiveTintColor: '#9CA3AF',
         tabBarStyle: {
+          display: 'none',
           position: 'absolute',
           left: 16,
           right: 16,
@@ -45,61 +46,7 @@ export default function TabsLayout() {
         }}
       />
 
-      <Tabs.Screen
-        name="saved"
-        options={{
-          title: 'Saved',
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'heart' : 'heart-outline'}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="progress"
-        options={{
-          title: 'Progress',
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'flame' : 'flame-outline'}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="themes"
-        options={{
-          title: 'Themes',
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'color-palette' : 'color-palette-outline'}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'settings' : 'settings-outline'}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
+     
     </Tabs>
   );
 }
