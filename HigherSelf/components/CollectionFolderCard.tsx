@@ -45,7 +45,7 @@ export function CollectionFolderCard({
 
 const styles = StyleSheet.create({
   card: {
-    minHeight: 132,
+    minHeight: 100,
     backgroundColor: '#141A26',
     flexDirection: 'row',
     alignItems: 'center',
@@ -74,6 +74,8 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '500',
     letterSpacing: -0.3,
+    lineHeight: 34,
+    paddingTop: 2,
   },
   count: {
     color: 'rgba(245, 247, 250, 0.68)',

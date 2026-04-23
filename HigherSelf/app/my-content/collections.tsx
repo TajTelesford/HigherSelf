@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import { CollectionFolderCard } from '@/components/CollectionFolderCard';
 import { CustomNameCollectionAlert } from '@/components/CustomNameCollectionAlert';
 import { Text } from '@/components/ui/text';
 import { useAffirmationCollections } from '@/context/AffirmationCollectionsContext';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
@@ -122,6 +122,7 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
   header: {
+    paddingTop: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#F5F7FA',
-    fontSize: 29,
+    fontSize: 25,
     fontWeight: '800',
     letterSpacing: 0.3,
   },
