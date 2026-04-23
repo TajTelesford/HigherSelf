@@ -1,7 +1,8 @@
 import CustomChooseAffirmationAlert from '@/components/CustomChooseAffirmationAlert';
+import RecordMicrophoneButton from '@/components/RecordMicrophoneButton';
 import { STORAGE_KEYS } from '@/data/HigherSelf_StorageKeys';
 import type { Affirmation } from '@/types/affirmations';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   RecordingPresets,
@@ -11,13 +12,14 @@ import {
   useAudioPlayerStatus,
   useAudioRecorder,
   useAudioRecorderState,
-  type RecorderState,
 } from 'expo-audio';
 import { Directory, File, Paths } from 'expo-file-system';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
+  Easing,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -43,12 +45,6 @@ type VoiceRecordingEntry = {
   createdAt: string;
   affirmations: Affirmation[];
 };
-
-const WAVE_BAR_COUNT = 27;
-const DEFAULT_WAVE = Array.from({ length: WAVE_BAR_COUNT }, (_, index) => {
-  const distance = Math.abs(index - (WAVE_BAR_COUNT - 1) / 2);
-  return 10 + Math.max(0, 16 - distance * 1.15);
-});
 
 const normalizeCustomAffirmations = (
   value: string | null
@@ -115,23 +111,8 @@ const formatSessionDate = (isoDate: string) =>
     day: '2-digit',
   });
 
-const buildWaveHeights = (level: number, tick: number) =>
-  DEFAULT_WAVE.map((base, index) => {
-    const swing =
-      Math.sin(tick / 2 + index * 0.8) * 7 +
-      Math.cos(tick / 3 + index * 0.35) * 4;
-
-    return Math.max(8, Math.min(64, base + level * 34 + swing));
-  });
-
-const getMeterLevel = (recorderState: RecorderState) => {
-  const metering = recorderState.metering ?? -160;
-  return Math.max(0, Math.min(1, (metering + 160) / 160));
-};
-
 export default function RecordAffirmationsScreen() {
-  const waveTickRef = useRef(0);
-  const idleWaveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordActionProgress = useRef(new Animated.Value(0)).current;
   const [deviceSavedAffirmations, setDeviceSavedAffirmations] = useState<
     Affirmation[]
   >([]);
@@ -142,7 +123,6 @@ export default function RecordAffirmationsScreen() {
   const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [isWorking, setIsWorking] = useState(false);
   const [pendingPlaybackStart, setPendingPlaybackStart] = useState(false);
-  const [waveHeights, setWaveHeights] = useState<number[]>(DEFAULT_WAVE);
   const [statusMessage, setStatusMessage] = useState(
     'Tap the mic to start recording in your own voice.'
   );
@@ -216,35 +196,6 @@ export default function RecordAffirmationsScreen() {
   }, [isBootstrapping, queuedAffirmations]);
 
   useEffect(() => {
-    if (recorderState.isRecording) {
-      if (idleWaveIntervalRef.current) {
-        clearInterval(idleWaveIntervalRef.current);
-        idleWaveIntervalRef.current = null;
-      }
-
-      waveTickRef.current += 1;
-      setWaveHeights(
-        buildWaveHeights(getMeterLevel(recorderState), waveTickRef.current)
-      );
-      return;
-    }
-
-    let tick = 0;
-    idleWaveIntervalRef.current = setInterval(() => {
-      tick += 1;
-      waveTickRef.current = tick;
-      setWaveHeights(buildWaveHeights(0.08, tick));
-    }, 180);
-
-    return () => {
-      if (idleWaveIntervalRef.current) {
-        clearInterval(idleWaveIntervalRef.current);
-        idleWaveIntervalRef.current = null;
-      }
-    };
-  }, [recorderState]);
-
-  useEffect(() => {
     if (!playerStatus.isLoaded || !playerStatus.didJustFinish) {
       return;
     }
@@ -272,6 +223,15 @@ export default function RecordAffirmationsScreen() {
     setPendingPlaybackStart(false);
   }, [pendingPlaybackStart, player, playerStatus.isLoaded]);
 
+  useEffect(() => {
+    Animated.timing(recordActionProgress, {
+      toValue: recorderState.isRecording ? 1 : 0,
+      duration: 240,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+  }, [recordActionProgress, recorderState.isRecording]);
+
   const queueCountLabel = useMemo(() => {
     const count = queuedAffirmations.length;
     return `${count} affirmation${count === 1 ? '' : 's'} in queue`;
@@ -282,6 +242,22 @@ export default function RecordAffirmationsScreen() {
   const playbackProgress = playbackDurationMs
     ? Math.min(1, playbackPositionMs / playbackDurationMs)
     : 0;
+  const recordButtonShift = recordActionProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -54],
+  });
+  const recordTimerOpacity = recordActionProgress.interpolate({
+    inputRange: [0, 0.45, 1],
+    outputRange: [0, 0, 1],
+  });
+  const recordTimerWidth = recordActionProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 94],
+  });
+  const recordTimerMargin = recordActionProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 14],
+  });
 
   const toggleQueuedAffirmation = (affirmation: Affirmation) => {
     setQueuedAffirmations((currentQueue) => {
@@ -348,7 +324,6 @@ export default function RecordAffirmationsScreen() {
 
       await recorder.prepareToRecordAsync();
       recorder.record();
-      waveTickRef.current = 0;
       setStatusMessage('Recording now. Speak your affirmations clearly and confidently.');
     } catch (error) {
       console.error('Failed to start recording:', error);
@@ -398,7 +373,6 @@ export default function RecordAffirmationsScreen() {
 
       await saveRecordingMetadata(entry);
       setStatusMessage('Saved to your device. Tap again anytime for another take.');
-      setWaveHeights(DEFAULT_WAVE);
     } catch (error) {
       console.error('Failed to save recording:', error);
       setStatusMessage('We could not save that take. Please try again.');
@@ -499,26 +473,6 @@ export default function RecordAffirmationsScreen() {
               <View style={styles.visualizerCard}>
                 <View style={styles.visualizerGlow} />
 
-                <View style={styles.waveRow}>
-                  {waveHeights.map((height, index) => (
-                    <View
-                      key={`wave-${index}`}
-                      style={[
-                        styles.waveBar,
-                        {
-                          height,
-                          opacity: recorderState.isRecording
-                            ? 0.65 + getMeterLevel(recorderState) * 0.35
-                            : 0.55,
-                        },
-                      ]}
-                    />
-                  ))}
-                </View>
-
-                <Text style={styles.timerText}>
-                  {formatElapsed(recorderState.durationMillis)}
-                </Text>
                 <Text style={styles.dateText}>
                   {lastSavedRecording
                     ? `Last saved ${formatSessionDate(lastSavedRecording.createdAt)}`
@@ -526,29 +480,35 @@ export default function RecordAffirmationsScreen() {
                 </Text>
               </View>
 
-              <Pressable
-                disabled={isWorking}
-                onPress={handleMainButtonPress}
-                style={({ pressed }) => [
-                  styles.recordButton,
-                  recorderState.isRecording && styles.recordButtonActive,
-                  pressed && !isWorking && styles.recordButtonPressed,
-                  isWorking && styles.recordButtonDisabled,
-                ]}
-              >
-                <View
+              <View style={styles.recordButtonWrap}>
+                <Animated.View
                   style={[
-                    styles.recordButtonInner,
-                    recorderState.isRecording && styles.recordButtonInnerActive,
+                    styles.recordActionRow,
+                    { transform: [{ translateX: recordButtonShift }] },
                   ]}
                 >
-                  <MaterialCommunityIcons
-                    color="#FFFFFF"
-                    name={recorderState.isRecording ? 'stop' : 'microphone'}
-                    size={32}
+                  <RecordMicrophoneButton
+                    disabled={isWorking}
+                    isRecording={recorderState.isRecording}
+                    onPress={handleMainButtonPress}
                   />
-                </View>
-              </Pressable>
+
+                  <Animated.View
+                    style={[
+                      styles.recordTimerWrap,
+                      {
+                        opacity: recordTimerOpacity,
+                        width: recordTimerWidth,
+                        marginLeft: recordTimerMargin,
+                      },
+                    ]}
+                  >
+                    <Text style={styles.recordTimerText}>
+                      {formatElapsed(recorderState.durationMillis)}
+                    </Text>
+                  </Animated.View>
+                </Animated.View>
+              </View>
 
               <View style={styles.heroFooter}>
                 <Text style={styles.heroFooterText}>
@@ -770,7 +730,7 @@ const styles = StyleSheet.create({
   visualizerCard: {
     marginTop: 22,
     borderRadius: 28,
-    minHeight: 230,
+    minHeight: 112,
     paddingHorizontal: 18,
     paddingVertical: 24,
     alignItems: 'center',
@@ -791,67 +751,32 @@ const styles = StyleSheet.create({
     shadowRadius: 32,
     shadowOffset: { width: 0, height: 0 },
   },
-  waveRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    minHeight: 90,
-    marginBottom: 22,
-  },
-  waveBar: {
-    width: 6,
-    borderRadius: 999,
-    backgroundColor: '#A855F7',
-  },
-  timerText: {
-    color: '#F5F7FA',
-    fontSize: 34,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-  },
   dateText: {
     color: '#8E99AF',
     fontSize: 13,
-    marginTop: 8,
     fontWeight: '600',
   },
-  recordButton: {
-    alignSelf: 'center',
+  recordButtonWrap: {
+    width: '100%',
     marginTop: 24,
-    width: 118,
-    height: 118,
-    borderRadius: 59,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(124, 58, 237, 0.18)',
-    borderWidth: 1,
-    borderColor: 'rgba(196, 181, 253, 0.24)',
+    overflow: 'visible',
   },
-  recordButtonActive: {
-    backgroundColor: 'rgba(251, 113, 133, 0.16)',
-    borderColor: 'rgba(253, 164, 175, 0.28)',
-  },
-  recordButtonPressed: {
-    transform: [{ scale: 0.97 }],
-  },
-  recordButtonDisabled: {
-    opacity: 0.7,
-  },
-  recordButtonInner: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+  recordActionRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#7C3AED',
-    shadowColor: '#8B5CF6',
-    shadowOpacity: 0.45,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 10 },
   },
-  recordButtonInnerActive: {
-    backgroundColor: '#EC4899',
+  recordTimerWrap: {
+    overflow: 'hidden',
+    justifyContent: 'center',
+  },
+  recordTimerText: {
+    color: '#F5F7FA',
+    fontSize: 28,
+    fontWeight: '700',
+    letterSpacing: 0.8,
   },
   heroFooter: {
     marginTop: 18,
