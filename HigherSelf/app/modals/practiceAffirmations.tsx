@@ -295,38 +295,64 @@ export default function PracticeAffirmationsScreen() {
             </ScrollView>
           ) : (
             <View style={styles.emptyState}>
-              <View style={styles.emptyIcon}>
-                <MaterialCommunityIcons
-                  color="#F5F7FA"
-                  name="meditation"
-                  size={34}
-                />
-              </View>
-              <Text style={styles.emptyTitle}>Build today&apos;s affirmation queue</Text>
-              <Text style={styles.emptyCopy}>
-                Choose from your liked affirmations and your own affirmations, then
-                move into the recording flow.
-              </Text>
+              <View style={styles.emptyStateCard}>
+                <View style={styles.emptyStateTopRow}>
+                  <View style={styles.emptyBadge}>
+                    <Ionicons color="#F6C453" name="sparkles" size={14} />
+                    <Text style={styles.emptyBadgeText}>Today&apos;s Practice</Text>
+                  </View>
+                </View>
 
-              <Pressable onPress={() => setShowPicker(true)} style={styles.primaryButton}>
-                <Text style={styles.primaryButtonText}>
-                  {queuedAffirmations.length
-                    ? "Edit Today's Queue"
-                    : 'Choose Affirmations'}
+                <View style={styles.emptyIcon}>
+                  <MaterialCommunityIcons
+                    color="#FFF7E8"
+                    name="meditation"
+                    size={34}
+                  />
+                </View>
+
+                <Text style={styles.emptyTitle}>Build today&apos;s affirmation queue</Text>
+                <Text style={styles.emptyCopy}>
+                  Choose from your liked affirmations and your own affirmations, then
+                  move into the recording flow.
                 </Text>
-              </Pressable>
 
-              {queuedAffirmations.length ? (
-                <Pressable
-                  onPress={openRecordingScreen}
-                  style={styles.secondaryButton}
-                >
-                  <Text style={styles.secondaryButtonText}>
-                    {queuedAffirmations.length} Affirmation
-                    {queuedAffirmations.length === 1 ? '' : 's'} Ready
+                <View style={styles.emptyFeatureRow}>
+                  <View style={styles.emptyFeaturePill}>
+                    <Ionicons color="#F6C453" name="star" size={13} />
+                    <Text style={styles.emptyFeatureText}>Liked picks</Text>
+                  </View>
+
+                  <View style={styles.emptyFeaturePill}>
+                    <Ionicons color="#F6C453" name="create-outline" size={13} />
+                    <Text style={styles.emptyFeatureText}>Custom affirmations</Text>
+                  </View>
+                </View>
+
+                <Pressable onPress={() => setShowPicker(true)} style={styles.primaryButton}>
+                  <Text style={styles.primaryButtonText}>
+                    {queuedAffirmations.length
+                      ? "Edit Today's Queue"
+                      : 'Choose Affirmations'}
                   </Text>
                 </Pressable>
-              ) : null}
+
+                {queuedAffirmations.length ? (
+                  <Pressable
+                    onPress={openRecordingScreen}
+                    style={styles.secondaryButton}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      {queuedAffirmations.length} Affirmation
+                      {queuedAffirmations.length === 1 ? '' : 's'} Ready
+                    </Text>
+                  </Pressable>
+                ) : null}
+
+                <Text style={styles.emptyFooterText}>
+                  Build a queue first, then move into your recording flow.
+                </Text>
+              </View>
             </View>
           )}
         </View>
@@ -407,16 +433,59 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 18,
   },
+  emptyStateCard: {
+    width: '100%',
+    borderRadius: 30,
+    paddingHorizontal: 24,
+    paddingVertical: 26,
+    backgroundColor: '#141B2A',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    shadowColor: '#000',
+    shadowOpacity: 0.24,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 10,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  emptyStateTopRow: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  emptyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(246, 196, 83, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(246, 196, 83, 0.24)',
+  },
+  emptyBadgeText: {
+    color: '#F3D488',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+  },
   emptyIcon: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+    width: 92,
+    height: 92,
+    borderRadius: 46,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(139, 124, 255, 0.18)',
+    backgroundColor: 'rgba(139, 124, 255, 0.16)',
     borderWidth: 1,
-    borderColor: 'rgba(167, 139, 250, 0.35)',
+    borderColor: 'rgba(246, 196, 83, 0.28)',
     marginBottom: 24,
+    shadowColor: '#F6C453',
+    shadowOpacity: 0.18,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
   },
   emptyTitle: {
     color: '#F5F7FA',
@@ -431,17 +500,47 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     textAlign: 'center',
     marginTop: 12,
-    marginBottom: 28,
+    marginBottom: 20,
     maxWidth: 320,
   },
+  emptyFeatureRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: 28,
+  },
+  emptyFeaturePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(246, 196, 83, 0.14)',
+  },
+  emptyFeatureText: {
+    color: '#E7DAB3',
+    fontSize: 13,
+    fontWeight: '600',
+  },
   primaryButton: {
-    minWidth: 220,
+    width: '100%',
     height: 56,
     borderRadius: 18,
     backgroundColor: '#8B5CF6',
+    borderWidth: 1,
+    borderColor: 'rgba(246, 196, 83, 0.26)',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
+    shadowColor: '#7C3AED',
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
   },
   primaryButtonDisabled: {
     opacity: 0.45,
@@ -453,20 +552,27 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     marginTop: 14,
-    minWidth: 220,
+    width: '100%',
     height: 52,
     borderRadius: 18,
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(246, 196, 83, 0.16)',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 18,
   },
   secondaryButtonText: {
-    color: '#F5F7FA',
+    color: '#F3E7BF',
     fontSize: 15,
     fontWeight: '600',
+  },
+  emptyFooterText: {
+    color: '#9DA9BC',
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: 'center',
+    marginTop: 16,
   },
   recordingContent: {
     paddingBottom: 28,

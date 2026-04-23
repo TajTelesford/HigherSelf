@@ -524,8 +524,6 @@ export default function RecordAffirmationsScreen() {
                                 styles.affirmationCardActive,
                             ]}
                           >
-                            <View style={styles.affirmationCardGlowPrimary} />
-                            <View style={styles.affirmationCardGlowAccent} />
                             <View style={styles.affirmationCardNoise} />
 
                             <View style={styles.affirmationCardTopRow}>
@@ -819,25 +817,6 @@ const styles = StyleSheet.create({
   affirmationCardActive: {
     borderColor: 'rgba(245, 224, 255, 0.34)',
     backgroundColor: '#1A1330',
-  },
-  affirmationCardGlowPrimary: {
-    position: 'absolute',
-    top: -18,
-    left: -24,
-    width: 220,
-    height: 220,
-    borderRadius: 999,
-    backgroundColor: 'rgba(136, 84, 255, 0.26)',
-    opacity: 0.95,
-  },
-  affirmationCardGlowAccent: {
-    position: 'absolute',
-    right: -26,
-    bottom: -18,
-    width: 170,
-    height: 170,
-    borderRadius: 999,
-    backgroundColor: 'rgba(255, 184, 108, 0.28)',
   },
   affirmationCardNoise: {
     position: 'absolute',

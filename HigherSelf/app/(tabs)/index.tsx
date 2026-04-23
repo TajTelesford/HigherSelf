@@ -21,8 +21,6 @@ export default function HomeScreen() {
       style={styles.container}
       resizeMode="cover"
     >
-      <View style={[styles.glow, styles.topGlow]} />
-      <View style={[styles.glow, styles.bottomGlow]} />
       <View pointerEvents="none" style={styles.overlay} />
 
       <FlatList
@@ -63,22 +61,5 @@ const styles = StyleSheet.create({
   },
   card: {
     minHeight: 460,
-  },
-  glow: {
-    position: 'absolute',
-    borderRadius: 999,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-  },
-  topGlow: {
-    top: 80,
-    right: -30,
-    height: 220,
-    width: 220,
-  },
-  bottomGlow: {
-    bottom: 120,
-    left: -70,
-    height: 280,
-    width: 280,
   },
 });
