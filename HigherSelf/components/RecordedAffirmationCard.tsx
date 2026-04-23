@@ -29,6 +29,20 @@ const formatDuration = (durationMillis: number) => {
   return `${minutes}:${seconds}`;
 };
 
+const formatRecordedDate = (createdAt: string) => {
+  const parsedDate = new Date(createdAt);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return 'Unknown date';
+  }
+
+  return parsedDate.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+};
+
 export function RecordedAffirmationCard({
   isDeleting = false,
   isPlaying,
@@ -85,8 +99,7 @@ export function RecordedAffirmationCard({
 
       <View style={styles.footer}>
         <Text style={styles.meta}>
-          {recording.affirmations.length} affirmation
-          {recording.affirmations.length === 1 ? '' : 's'} ·{' '}
+          {formatRecordedDate(recording.createdAt)} ·{' '}
           {formatDuration(recording.durationMillis)}
         </Text>
 

@@ -350,6 +350,11 @@ export default function RecordAffirmationsScreen() {
     setStatusMessage('Saving your recording in the app...');
 
     try {
+      const capturedDurationMillis = Math.max(
+        recorderState.durationMillis ?? 0,
+        Math.round((recorder.currentTime ?? 0) * 1000)
+      );
+
       await recorder.stop();
       const finalRecorderState = recorder.getStatus();
       const sourceUri = recorder.uri ?? finalRecorderState.url;
@@ -374,7 +379,10 @@ export default function RecordAffirmationsScreen() {
         id: createdAt,
         uri: destinationFile.uri,
         fileName,
-        durationMillis: finalRecorderState.durationMillis,
+        durationMillis: Math.max(
+          capturedDurationMillis,
+          finalRecorderState.durationMillis ?? 0
+        ),
         createdAt,
         affirmations: queuedAffirmations,
       };
