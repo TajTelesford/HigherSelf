@@ -6,4 +6,5 @@ export const STORAGE_KEYS = {
   PRACTICE_AFFIRMATION_QUEUE: 'practice_affirmation_queue',
   PRACTICE_AFFIRMATION_PROMPT_DATE: 'practice_affirmation_prompt_date',
   VOICE_RECORDINGS: 'voice_recordings',
+  USER_STREAK: 'user_streak',
 };

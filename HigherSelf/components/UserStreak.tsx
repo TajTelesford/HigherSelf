@@ -1,26 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Share, Pressable, StyleSheet, Text, View } from 'react-native';
 
-type StreakDay = {
-  label: string;
-  state?: 'done' | 'missed' | 'upcoming';
-};
+import { useStreak, type StreakDay } from '@/context/StreakContext';
+
+type StreakDayOverride = Pick<StreakDay, 'label' | 'state'>;
 
 type UserStreakProps = {
   streakCount?: number;
-  days?: StreakDay[];
+  days?: StreakDayOverride[];
   onSharePress?: () => void;
   onMorePress?: () => void;
 };
 
-const DEFAULT_DAYS: StreakDay[] = [
-  { label: 'Sa', state: 'done' },
-  { label: 'Su', state: 'missed' },
+const DEFAULT_DAYS: StreakDayOverride[] = [
   { label: 'Mo', state: 'missed' },
   { label: 'Tu', state: 'missed' },
   { label: 'We', state: 'done' },
   { label: 'Th', state: 'upcoming' },
   { label: 'Fr', state: 'upcoming' },
+  { label: 'Sa', state: 'done' },
+  { label: 'Su', state: 'missed' },
 ];
 
 function ActionIcon({
@@ -41,7 +41,7 @@ function ActionIcon({
   );
 }
 
-function DayStatus({ day }: { day: StreakDay }) {
+function DayStatus({ day }: { day: StreakDayOverride }) {
   const isDone = day.state === 'done';
   const isMissed = day.state === 'missed';
 
@@ -67,17 +67,54 @@ function DayStatus({ day }: { day: StreakDay }) {
 }
 
 export default function UserStreak({
-  streakCount = 2,
-  days = DEFAULT_DAYS,
+  streakCount,
+  days,
   onSharePress,
   onMorePress,
 }: UserStreakProps) {
+  const router = useRouter();
+  const {
+    days: streakDays,
+    isLoaded,
+    streakCount: liveStreakCount,
+    trackingEnabled,
+  } = useStreak();
+
+  const resolvedStreakCount = streakCount ?? liveStreakCount;
+  const resolvedDays = days ?? (isLoaded ? streakDays : DEFAULT_DAYS);
+
+  const handleSharePress = async () => {
+    if (onSharePress) {
+      onSharePress();
+      return;
+    }
+
+    try {
+      await Share.share({
+        message: trackingEnabled
+          ? `I'm on a ${resolvedStreakCount}-day HigherSelf streak.`
+          : 'I just turned on streak tracking in HigherSelf.',
+      });
+    } catch (error) {
+      console.error('Failed to share streak:', error);
+    }
+  };
+
+  const handleMorePress = () => {
+    if (onMorePress) {
+      onMorePress();
+      return;
+    }
+
+    router.push('/modals/streak');
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.inner}>
         <View style={styles.leftColumn}>
           <View style={styles.ring}>
-            <Text style={styles.ringValue}>{streakCount}</Text>
+            <Text style={styles.ringValue}>{resolvedStreakCount}</Text>
           </View>
 
           <Ionicons name="sparkles" size={19} color="#F4DED8" style={styles.sparkle} />
@@ -88,16 +125,20 @@ export default function UserStreak({
             <Text style={styles.title}>Your streak</Text>
 
             <View style={styles.actions}>
-              <ActionIcon name="share-outline" onPress={onSharePress} />
-              <ActionIcon name="ellipsis-vertical" onPress={onMorePress} />
+              <ActionIcon name="share-outline" onPress={handleSharePress} />
+              <ActionIcon name="ellipsis-vertical" onPress={handleMorePress} />
             </View>
           </View>
 
           <View style={styles.daysRow}>
-            {days.map((day) => (
+            {resolvedDays.map((day) => (
               <DayStatus key={day.label} day={day} />
             ))}
           </View>
+
+          {!trackingEnabled ? (
+            <Text style={styles.helperText}>Tracking is off</Text>
+          ) : null}
         </View>
       </View>
     </View>
@@ -187,6 +228,12 @@ const styles = StyleSheet.create({
   daysRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  helperText: {
+    color: 'rgba(245, 247, 250, 0.58)',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 12,
   },
   dayItem: {
     alignItems: 'center',
