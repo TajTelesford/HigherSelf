@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import 'react-native-reanimated';
 import '../global.css';
 
+import { AffirmationCollectionsProvider } from '@/context/AffirmationCollectionsContext';
 import { SavedAffirmationsProvider } from '@/context/SavedAffirmationContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ThemeContextProvider } from '../context/ThemeContextProvider';
@@ -36,85 +37,91 @@ export default function RootLayout() {
   return (
     <ThemeContextProvider>
       <SavedAffirmationsProvider>
-        <ThemeProvider value={theme}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen
-              name="modals/themes"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-            />
-            <Stack.Screen
-              name="modals/profile"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-            />
-            <Stack.Screen
-              name="modals/explore"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-            />
-            <Stack.Screen
-              name="modals/mood"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-            />
-            <Stack.Screen
-              name="modals/practiceAffirmations"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-            />
-            <Stack.Screen
-              name="modals/recordAffirmations"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-            />
+        <AffirmationCollectionsProvider>
+          <ThemeProvider value={theme}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen
+                name="modals/themes"
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+              <Stack.Screen
+                name="modals/profile"
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+              <Stack.Screen
+                name="modals/explore"
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+              <Stack.Screen
+                name="modals/mood"
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+              <Stack.Screen
+                name="modals/practiceAffirmations"
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+              <Stack.Screen
+                name="modals/recordAffirmations"
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
 
-            <Stack.Screen
-              name="my-content/collections"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-            />
-            <Stack.Screen
-              name="my-content/favorites"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-            />
-            <Stack.Screen
-              name="my-content/my-own-affirmations"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-            />
-            <Stack.Screen
-              name="my-content/history"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-            />
-  
-
-
-          </Stack>
-        </ThemeProvider>
+              <Stack.Screen
+                name="my-content/collections"
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+              <Stack.Screen
+                name="my-content/collection-detail"
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_right',
+                }}
+              />
+              <Stack.Screen
+                name="my-content/favorites"
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+              <Stack.Screen
+                name="my-content/my-own-affirmations"
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+              <Stack.Screen
+                name="my-content/history"
+                options={{
+                  presentation: 'transparentModal',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+            </Stack>
+          </ThemeProvider>
+        </AffirmationCollectionsProvider>
       </SavedAffirmationsProvider>
     </ThemeContextProvider>
   );
