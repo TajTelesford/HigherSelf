@@ -74,6 +74,38 @@ export default function RootLayout() {
                 animation: 'slide_from_bottom',
               }}
             />
+
+            <Stack.Screen
+              name="my-content/collections"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="my-content/favorites"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="my-content/my-own-affirmations"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="my-content/history"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'slide_from_bottom',
+              }}
+            />
+  
+
+
           </Stack>
         </ThemeProvider>
       </SavedAffirmationsProvider>

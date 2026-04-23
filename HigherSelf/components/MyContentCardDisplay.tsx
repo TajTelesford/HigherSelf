@@ -16,7 +16,7 @@ const CONTENT_ROWS = [
   ],
   [
     {
-      title: 'My own\naffirmations',
+      title: 'My\naffirmations',
       href: '/my-content/my-own-affirmations',
       icon: {
         family: 'material-community' as const,
@@ -47,7 +47,7 @@ export function MyContentCardDisplay() {
 
 const styles = StyleSheet.create({
   grid: {
-    gap: 16,
+    gap: 0,
   },
   row: {
     flexDirection: 'row',
