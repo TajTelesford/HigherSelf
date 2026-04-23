@@ -26,7 +26,7 @@ const PROFILE_CARDS: ProfileCard[] = [
     onPress: () => Alert.alert('Reminders', 'Reminder settings are coming next.'),
   },
   {
-    title: 'Home Screen widgets',
+    title: 'Widgets',
     icon: 'tablet-dashboard',
     onPress: () => Alert.alert('Widgets', 'Widget setup is coming next.'),
   },
@@ -161,6 +161,10 @@ const styles = StyleSheet.create({
   },
   gridRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-evenly',
+    alignContent: 'center',
+    alignItems: 'center',
+    gap: 0,
   },
+  
 });
