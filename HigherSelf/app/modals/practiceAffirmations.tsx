@@ -202,6 +202,14 @@ export default function PracticeAffirmationsScreen() {
     setScreenStep('recording');
   };
 
+  const goToRecordAffirmations = () => {
+    if (!queuedAffirmations.length) {
+      return;
+    }
+
+    router.push('/modals/recordAffirmations');
+  };
+
   const isLoading = savedLoading || isBootstrapping;
 
   return (
@@ -230,25 +238,63 @@ export default function PracticeAffirmationsScreen() {
               showsVerticalScrollIndicator={false}
             >
               <View style={styles.heroCard}>
-                <Text style={styles.eyebrow}>Today&apos;s Practice</Text>
-                <Text style={styles.heroTitle}>Recording Screen</Text>
-                <Text style={styles.heroCopy}>
-                  Your affirmation queue is ready. This is the handoff state for the
-                  recorder flow, and it keeps the selected affirmations visible for
-                  the next step.
-                </Text>
+                <View style={styles.heroTopRow}>
+                  <View style={styles.eyebrowPill}>
+                    <View style={styles.eyebrowDot} />
+                    <Text style={styles.eyebrow}>Today&apos;s Practice</Text>
+                  </View>
 
-                <View style={styles.microphoneBadge}>
-                  <MaterialCommunityIcons
-                    color="#F5F7FA"
-                    name="microphone"
-                    size={34}
-                  />
+                  <View style={styles.queueReadyBadge}>
+                    <Ionicons color="#F6C453" name="sparkles" size={14} />
+                    <Text style={styles.queueReadyBadgeText}>Queue Ready</Text>
+                  </View>
                 </View>
 
-                <Pressable onPress={() => setShowPicker(true)} style={styles.primaryButton}>
-                  <Text style={styles.primaryButtonText}>Edit Queue</Text>
+                <Text style={styles.heroTitle}>Ready To Record</Text>
+                <Text style={styles.heroCopy}>
+                  Your affirmation queue is ready. Tap the mic to open the recorder
+                  and capture these affirmations in your own voice.
+                </Text>
+
+                <Pressable
+                  onPress={goToRecordAffirmations}
+                  style={({ pressed }) => [
+                    styles.microphoneBadgeOuter,
+                    pressed && styles.microphoneBadgePressed,
+                  ]}
+                >
+                  <View style={styles.microphoneBadgeMiddle}>
+                    <View style={styles.microphoneBadge}>
+                      <MaterialCommunityIcons
+                        color="#F5F7FA"
+                        name="microphone"
+                        size={34}
+                      />
+                    </View>
+                  </View>
                 </Pressable>
+
+                <View style={styles.heroActionRow}>
+                  <Pressable
+                    onPress={goToRecordAffirmations}
+                    style={styles.heroPrimaryButton}
+                  >
+                    <MaterialCommunityIcons
+                      color="#FFF8E7"
+                      name="microphone-outline"
+                      size={18}
+                    />
+                    <Text style={styles.heroPrimaryButtonText}>Open Recorder</Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => setShowPicker(true)}
+                    style={styles.heroSecondaryButton}
+                  >
+                    <Ionicons color="#F6C453" name="create-outline" size={17} />
+                    <Text style={styles.heroSecondaryButtonText}>Edit Queue</Text>
+                  </Pressable>
+                </View>
               </View>
 
               <View style={styles.sectionHeader}>
@@ -450,42 +496,161 @@ const styles = StyleSheet.create({
     gap: 18,
   },
   heroCard: {
-    borderRadius: 28,
+    borderRadius: 30,
     padding: 24,
-    backgroundColor: '#151C2B',
+    backgroundColor: '#141B2A',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    shadowColor: '#000',
+    shadowOpacity: 0.24,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 10,
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  eyebrowPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.07)',
   },
+  eyebrowDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: '#F6C453',
+    shadowColor: '#F6C453',
+    shadowOpacity: 0.55,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 0 },
+  },
+  queueReadyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: 'rgba(246, 196, 83, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(246, 196, 83, 0.24)',
+  },
+  queueReadyBadgeText: {
+    color: '#F6D27A',
+    fontSize: 12,
+    fontWeight: '700',
+  },
   eyebrow: {
-    color: '#A78BFA',
-    fontSize: 13,
+    color: '#D8DEEA',
+    fontSize: 12,
     fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 1.1,
   },
   heroTitle: {
     color: '#F5F7FA',
-    fontSize: 30,
+    fontSize: 31,
     fontWeight: '700',
-    marginTop: 10,
+    marginTop: 16,
+    lineHeight: 37,
   },
   heroCopy: {
-    color: '#C6CDD8',
+    color: '#BAC4D3',
     fontSize: 15,
-    lineHeight: 23,
+    lineHeight: 24,
     marginTop: 12,
+    maxWidth: 310,
   },
-  microphoneBadge: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+  microphoneBadgeOuter: {
+    width: 128,
+    height: 128,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
-    marginVertical: 24,
-    backgroundColor: 'rgba(139, 92, 246, 0.18)',
+    marginTop: 26,
+    marginBottom: 22,
+    backgroundColor: 'rgba(124, 58, 237, 0.10)',
     borderWidth: 1,
-    borderColor: 'rgba(167, 139, 250, 0.32)',
+    borderColor: 'rgba(246, 196, 83, 0.14)',
+  },
+  microphoneBadgeMiddle: {
+    width: 98,
+    height: 98,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  microphoneBadge: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#7C3AED',
+    borderWidth: 1,
+    borderColor: 'rgba(246, 196, 83, 0.34)',
+    shadowColor: '#7C3AED',
+    shadowOpacity: 0.45,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+  },
+  microphoneBadgePressed: {
+    transform: [{ scale: 0.96 }],
+  },
+  heroActionRow: {
+    gap: 12,
+  },
+  heroPrimaryButton: {
+    height: 56,
+    borderRadius: 18,
+    backgroundColor: '#7C3AED',
+    borderWidth: 1,
+    borderColor: 'rgba(246, 196, 83, 0.26)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: 20,
+    shadowColor: '#7C3AED',
+    shadowOpacity: 0.26,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+  },
+  heroPrimaryButtonText: {
+    color: '#FFF8E7',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  heroSecondaryButton: {
+    height: 52,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(246, 196, 83, 0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 18,
+  },
+  heroSecondaryButtonText: {
+    color: '#F3E7BF',
+    fontSize: 15,
+    fontWeight: '600',
   },
   sectionHeader: {
     paddingHorizontal: 2,
