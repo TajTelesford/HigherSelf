@@ -1,4 +1,5 @@
 import { MyContentCardDisplay } from '@/components/MyContentCardDisplay';
+import { ProfileContentCard } from '@/components/ProfileContentCard';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -39,6 +40,8 @@ export default function LibraryScreen() {
 
           <Text style={styles.sectionTitle}>My Content</Text>
           <MyContentCardDisplay />
+
+          <ProfileContentCard text="Go back to your profile hub to see your streak, customization tools, and account shortcuts." />
         </ScrollView>
       </SafeAreaView>
     </View>
