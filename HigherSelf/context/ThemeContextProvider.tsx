@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import { Asset } from 'expo-asset';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { THEMES } from '../data/themes';
 
@@ -10,15 +17,24 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
+const THEMES_BY_ID = Object.fromEntries(
+  THEMES.map((theme) => [theme.id, theme])
+) as Record<string, (typeof THEMES)[number]>;
+
 export function ThemeContextProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [selectedThemeId, setSelectedThemeId] = useState('aurora');
+  const [selectedThemeId, setSelectedThemeId] = useState(THEMES[0]?.id ?? '');
 
-  const selectedTheme =
-    THEMES.find((theme) => theme.id === selectedThemeId) ?? THEMES[0];
+  useEffect(() => {
+    Asset.loadAsync(THEMES.map((theme) => theme.image as number)).catch((error) => {
+      console.error('Failed to preload theme images:', error);
+    });
+  }, []);
+
+  const selectedTheme = THEMES_BY_ID[selectedThemeId] ?? THEMES[0];
 
   const value = useMemo(
     () => ({

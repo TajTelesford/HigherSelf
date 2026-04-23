@@ -1,8 +1,8 @@
 import { AffirmationsCard } from '@/components/AffirmationsCard';
 import FloatingActionButtons from '@/components/FloatingActionButtons';
+import { Image as ExpoImage } from 'expo-image';
 import {
   FlatList,
-  ImageBackground,
   StyleSheet,
   View,
   useWindowDimensions,
@@ -16,11 +16,14 @@ export default function HomeScreen() {
   const { selectedTheme } = useThemeSelection();
 
   return (
-    <ImageBackground
-      source={selectedTheme.image}
-      style={styles.container}
-      resizeMode="cover"
-    >
+    <View style={styles.container}>
+      <ExpoImage
+        cachePolicy="memory-disk"
+        contentFit="cover"
+        source={selectedTheme.image}
+        style={styles.backgroundImage}
+        transition={0}
+      />
       <View pointerEvents="none" style={styles.overlay} />
 
       <FlatList
@@ -47,13 +50,16 @@ export default function HomeScreen() {
       />
 
       <FloatingActionButtons />
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,

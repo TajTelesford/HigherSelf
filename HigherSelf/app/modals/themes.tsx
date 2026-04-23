@@ -1,16 +1,16 @@
+import { useThemeSelection } from '@/context/ThemeContextProvider';
+import { THEMES } from '@/data/themes';
 import { Ionicons } from '@expo/vector-icons';
+import { Image as ExpoImage } from 'expo-image';
 import { router } from 'expo-router';
 import {
   FlatList,
-  Image,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useThemeSelection } from '@/context/ThemeContextProvider';
-import { THEMES } from '@/data/themes';
 
 export default function ThemesScreen() {
   const { selectedThemeId, setSelectedThemeId } = useThemeSelection();
@@ -45,7 +45,13 @@ export default function ThemesScreen() {
                 onPress={() => setSelectedThemeId(item.id)}
                 style={[styles.card, isSelected && styles.cardSelected]}
               >
-                <Image source={item.image} style={styles.image} />
+                <ExpoImage
+                  cachePolicy="memory-disk"
+                  contentFit="cover"
+                  source={item.image}
+                  style={styles.image}
+                  transition={0}
+                />
               </Pressable>
             );
           }}
