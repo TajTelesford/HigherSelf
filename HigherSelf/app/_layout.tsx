@@ -4,8 +4,8 @@ import 'react-native-reanimated';
 import '../global.css';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { SavedAffirmationsProvider } from './context/SavedAffirmationContext';
-import { ThemeContextProvider } from './context/ThemeContextProvider';
+import { SavedAffirmationsProvider } from '@/context/SavedAffirmationContext';
+import { ThemeContextProvider } from '@/context/ThemeContextProvider';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

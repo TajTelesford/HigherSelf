@@ -9,8 +9,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useThemeSelection } from '../context/ThemeContextProvider';
-import { THEMES } from '../data/themes';
+import { useThemeSelection } from '@/context/ThemeContextProvider';
+import { THEMES } from '@/data/themes';
 
 export default function ThemesScreen() {
   const { selectedThemeId, setSelectedThemeId } = useThemeSelection();

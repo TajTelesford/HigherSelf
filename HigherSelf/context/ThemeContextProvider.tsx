@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { THEMES } from '../data/themes';
+
+import { THEMES } from '@/data/themes';
 
 type ThemeContextType = {
   selectedThemeId: string;
@@ -9,7 +10,11 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
-export function ThemeContextProvider({ children }: { children: React.ReactNode }) {
+export function ThemeContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [selectedThemeId, setSelectedThemeId] = useState('aurora');
 
   const selectedTheme =
@@ -24,11 +29,7 @@ export function ThemeContextProvider({ children }: { children: React.ReactNode }
     [selectedThemeId, selectedTheme]
   );
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export function useThemeSelection() {

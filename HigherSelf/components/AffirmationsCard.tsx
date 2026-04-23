@@ -1,5 +1,5 @@
-import { useSavedAffirmations } from '@/app/context/SavedAffirmationContext';
-import type { AffirmationCategory } from '@/app/types/affirmations';
+import { useSavedAffirmations } from '@/context/SavedAffirmationContext';
+import type { AffirmationCategory } from '@/types/affirmations';
 import { Text } from '@/components/ui/text';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import type { ComponentProps } from 'react';

@@ -1,9 +1,98 @@
+import { MoodCalendar } from '@/components/MoodCalendar';
+import { MoodPicker, type MoodOption } from '@/components/MoodPicker';
+import { TodaysMood } from '@/components/TodaysMood';
+import { STORAGE_KEYS } from '@/data/HigherSelf_StorageKeys';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const MOOD_OPTIONS: MoodOption[] = [
+  { id: 'amazing', label: 'Amazing', icon: 'happy-outline', accent: '#F59E0B' },
+  { id: 'good', label: 'Good', icon: 'sunny-outline', accent: '#38BDF8' },
+  { id: 'calm', label: 'Calm', icon: 'leaf-outline', accent: '#34D399' },
+  { id: 'tired', label: 'Tired', icon: 'moon-outline', accent: '#A78BFA' },
+  { id: 'sad', label: 'Sad', icon: 'rainy-outline', accent: '#60A5FA' },
+  { id: 'stressed', label: 'Stressed', icon: 'thunderstorm-outline', accent: '#F87171' },
+];
+
+const getTodayKey = () => new Date().toISOString().slice(0, 10);
+
 export default function MoodScreen() {
+  const [selectedMoodId, setSelectedMoodId] = useState<string | null>(null);
+  const [moodsByDate, setMoodsByDate] = useState<Record<string, string>>({});
+  const [isEditingMood, setIsEditingMood] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadTodayMood = async () => {
+      try {
+        const storedMoods = await AsyncStorage.getItem(
+          STORAGE_KEYS.DAILY_MOOD_SELECTIONS
+        );
+
+        if (!storedMoods) {
+          return;
+        }
+
+        const parsedMoods = JSON.parse(storedMoods) as Record<string, string>;
+        setMoodsByDate(parsedMoods);
+        const todayMood = parsedMoods[getTodayKey()];
+
+        if (todayMood) {
+          setSelectedMoodId(todayMood);
+        }
+      } catch (error) {
+        console.error('Failed to load today mood:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTodayMood();
+  }, []);
+
+  const handleSelectMood = async (moodId: string) => {
+    if (selectedMoodId && !isEditingMood) {
+      return;
+    }
+
+    try {
+      const storedMoods = await AsyncStorage.getItem(
+        STORAGE_KEYS.DAILY_MOOD_SELECTIONS
+      );
+      const parsedMoods = storedMoods
+        ? (JSON.parse(storedMoods) as Record<string, string>)
+        : {};
+
+      parsedMoods[getTodayKey()] = moodId;
+
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.DAILY_MOOD_SELECTIONS,
+        JSON.stringify(parsedMoods)
+      );
+
+      setMoodsByDate(parsedMoods);
+      setSelectedMoodId(moodId);
+      setIsEditingMood(false);
+    } catch (error) {
+      console.error('Failed to save mood:', error);
+    }
+  };
+
+  const selectedMood = MOOD_OPTIONS.find((mood) => mood.id === selectedMoodId);
+  const isLocked = Boolean(selectedMoodId);
+  const shouldShowPicker = !isLocked || isEditingMood;
+
   return (
     <View style={styles.backdrop}>
       <Pressable style={styles.dismissArea} onPress={() => router.back()} />
@@ -20,7 +109,35 @@ export default function MoodScreen() {
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.contentText}>Mood</Text>
+          {shouldShowPicker ? (
+            <Text style={styles.prompt}>How is your mood today?</Text>
+          ) : null}
+
+          {loading ? (
+            <View style={styles.loadingState}>
+              <ActivityIndicator color="#F5F7FA" />
+            </View>
+          ) : shouldShowPicker ? (
+            <>
+              <MoodPicker
+                isLocked={false}
+                moods={MOOD_OPTIONS}
+                onSelectMood={handleSelectMood}
+                selectedMoodId={selectedMoodId}
+              />
+            </>
+          ) : (
+            <ScrollView
+              contentContainerStyle={styles.historyContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <TodaysMood
+                mood={selectedMood}
+                onConfirmUpdate={() => setIsEditingMood(true)}
+              />
+              <MoodCalendar moodOptions={MOOD_OPTIONS} moodsByDate={moodsByDate} />
+            </ScrollView>
+          )}
         </View>
       </SafeAreaView>
     </View>
@@ -76,12 +193,29 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingTop: 32,
   },
-  contentText: {
+  prompt: {
     color: '#F5F7FA',
-    fontSize: 22,
-    fontWeight: '600',
+    fontSize: 28,
+    fontWeight: '700',
+    lineHeight: 34,
+    paddingBottom: 28,
+  },
+  helperText: {
+    color: '#C6CDD8',
+    fontSize: 15,
+    lineHeight: 22,
+    marginTop: 10,
+    marginBottom: 28,
+  },
+  loadingState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  historyContent: {
+    paddingBottom: 24,
+    gap: 18,
   },
 });
