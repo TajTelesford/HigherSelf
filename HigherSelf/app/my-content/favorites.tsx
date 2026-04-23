@@ -1,13 +1,32 @@
 import { Ionicons } from '@expo/vector-icons';
+import { CollectionPickerAlert } from '@/components/CollectionPickerAlert';
 import { SavedAffirmationCard } from '@/components/SavedAffirmationCard';
 import { Text } from '@/components/ui/text';
+import { useAffirmationCollections } from '@/context/AffirmationCollectionsContext';
 import { useSavedAffirmations } from '@/context/SavedAffirmationContext';
 import { router } from 'expo-router';
+import { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import type { Affirmation } from '@/types/affirmations';
 
 export default function FavoritesScreen() {
   const { savedAffirmations, loading } = useSavedAffirmations();
+  const { collections, isAffirmationInCollection, toggleAffirmationInCollection } =
+    useAffirmationCollections();
+  const [selectedAffirmation, setSelectedAffirmation] = useState<Affirmation | null>(
+    null
+  );
+
+  const bookmarkedAffirmationIds = useMemo(
+    () =>
+      new Set(
+        collections.flatMap((collection) =>
+          collection.affirmations.map((affirmation) => affirmation.id)
+        )
+      ),
+    [collections]
+  );
 
   const renderContent = () => {
     if (loading) {
@@ -30,7 +49,13 @@ export default function FavoritesScreen() {
       <FlatList
         data={savedAffirmations}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <SavedAffirmationCard affirmation={item} />}
+        renderItem={({ item }) => (
+          <SavedAffirmationCard
+            affirmation={item}
+            bookmarked={bookmarkedAffirmationIds.has(item.id)}
+            onBookmarkPress={() => setSelectedAffirmation(item)}
+          />
+        )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
@@ -55,6 +80,17 @@ export default function FavoritesScreen() {
 
         <View style={styles.content}>{renderContent()}</View>
       </SafeAreaView>
+
+      <CollectionPickerAlert
+        affirmation={selectedAffirmation}
+        collections={collections}
+        isAffirmationInCollection={isAffirmationInCollection}
+        isVisible={selectedAffirmation !== null}
+        onClose={() => setSelectedAffirmation(null)}
+        onToggleCollection={(collectionId, affirmation) =>
+          toggleAffirmationInCollection(collectionId, affirmation)
+        }
+      />
     </View>
   );
 }

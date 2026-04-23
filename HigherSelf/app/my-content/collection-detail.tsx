@@ -1,15 +1,38 @@
 import { Ionicons } from '@expo/vector-icons';
+import { CollectionPickerAlert } from '@/components/CollectionPickerAlert';
+import { SavedAffirmationCard } from '@/components/SavedAffirmationCard';
 import { Text } from '@/components/ui/text';
 import { useAffirmationCollections } from '@/context/AffirmationCollectionsContext';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import type { Affirmation } from '@/types/affirmations';
 
 export default function CollectionDetailScreen() {
   const { collectionId } = useLocalSearchParams<{ collectionId?: string }>();
-  const { deleteCollection, getCollectionById, loading } =
-    useAffirmationCollections();
+  const {
+    collections,
+    deleteCollection,
+    getCollectionById,
+    isAffirmationInCollection,
+    loading,
+    toggleAffirmationInCollection,
+  } = useAffirmationCollections();
   const collection = collectionId ? getCollectionById(collectionId) : undefined;
+  const [selectedAffirmation, setSelectedAffirmation] = useState<Affirmation | null>(
+    null
+  );
+
+  const bookmarkedAffirmationIds = useMemo(
+    () =>
+      new Set(
+        collections.flatMap((item) =>
+          item.affirmations.map((affirmation) => affirmation.id)
+        )
+      ),
+    [collections]
+  );
 
   const handleDeleteCollection = () => {
     if (!collection) return;
@@ -70,13 +93,11 @@ export default function CollectionDetailScreen() {
         data={collection.affirmations}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.affirmationCard}>
-            <Text style={styles.affirmationText}>{item.text}</Text>
-            <View style={styles.affirmationFooter}>
-              <Text style={styles.affirmationCategory}>{item.category}</Text>
-              <Ionicons color="#F5F7FA" name="bookmark" size={24} />
-            </View>
-          </View>
+          <SavedAffirmationCard
+            affirmation={item}
+            bookmarked={bookmarkedAffirmationIds.has(item.id)}
+            onBookmarkPress={() => setSelectedAffirmation(item)}
+          />
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={styles.listContent}
@@ -128,6 +149,17 @@ export default function CollectionDetailScreen() {
 
         <View style={styles.content}>{renderContent()}</View>
       </SafeAreaView>
+
+      <CollectionPickerAlert
+        affirmation={selectedAffirmation}
+        collections={collections}
+        isAffirmationInCollection={isAffirmationInCollection}
+        isVisible={selectedAffirmation !== null}
+        onClose={() => setSelectedAffirmation(null)}
+        onToggleCollection={(targetCollectionId, affirmation) =>
+          toggleAffirmationInCollection(targetCollectionId, affirmation)
+        }
+      />
     </View>
   );
 }
@@ -242,32 +274,6 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 18,
-  },
-  affirmationCard: {
-    borderRadius: 24,
-    backgroundColor: '#141A26',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    paddingHorizontal: 22,
-    paddingVertical: 22,
-  },
-  affirmationText: {
-    color: '#F5F7FA',
-    fontSize: 24,
-    lineHeight: 33,
-    fontWeight: '500',
-  },
-  affirmationFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 24,
-  },
-  affirmationCategory: {
-    color: 'rgba(245, 247, 250, 0.58)',
-    fontSize: 16,
-    fontWeight: '600',
-    textTransform: 'capitalize',
   },
   centerContent: {
     flex: 1,

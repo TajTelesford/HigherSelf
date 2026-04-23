@@ -9,12 +9,18 @@ import React, {
 } from 'react';
 
 import { STORAGE_KEYS } from '@/data/HigherSelf_StorageKeys';
+import type { Affirmation } from '@/types/affirmations';
 import type { AffirmationCollection } from '@/types/collections';
 
 type AffirmationCollectionsContextType = {
   collections: AffirmationCollection[];
   loading: boolean;
   addCollection: (name: string) => AffirmationCollection;
+  toggleAffirmationInCollection: (
+    collectionId: string,
+    affirmation: Affirmation
+  ) => void;
+  isAffirmationInCollection: (collectionId: string, affirmationId: string) => boolean;
   deleteCollection: (id: string) => void;
   getCollectionById: (id: string) => AffirmationCollection | undefined;
 };
@@ -81,6 +87,40 @@ export function AffirmationCollectionsProvider({
     return collection;
   }, []);
 
+  const toggleAffirmationInCollection = useCallback(
+    (collectionId: string, affirmation: Affirmation) => {
+      setCollections((prev) =>
+        prev.map((collection) => {
+          if (collection.id !== collectionId) {
+            return collection;
+          }
+
+          const alreadyIncluded = collection.affirmations.some(
+            (item) => item.id === affirmation.id
+          );
+
+          return {
+            ...collection,
+            affirmations: alreadyIncluded
+              ? collection.affirmations.filter((item) => item.id !== affirmation.id)
+              : [...collection.affirmations, affirmation],
+          };
+        })
+      );
+    },
+    []
+  );
+
+  const isAffirmationInCollection = useCallback(
+    (collectionId: string, affirmationId: string) =>
+      collections.some(
+        (collection) =>
+          collection.id === collectionId &&
+          collection.affirmations.some((item) => item.id === affirmationId)
+      ),
+    [collections]
+  );
+
   const deleteCollection = useCallback((id: string) => {
     setCollections((prev) =>
       prev.filter((collection) => collection.id !== id)
@@ -97,10 +137,20 @@ export function AffirmationCollectionsProvider({
       collections,
       loading,
       addCollection,
+      toggleAffirmationInCollection,
+      isAffirmationInCollection,
       deleteCollection,
       getCollectionById,
     }),
-    [addCollection, collections, deleteCollection, getCollectionById, loading]
+    [
+      addCollection,
+      collections,
+      deleteCollection,
+      getCollectionById,
+      isAffirmationInCollection,
+      loading,
+      toggleAffirmationInCollection,
+    ]
   );
 
   return (

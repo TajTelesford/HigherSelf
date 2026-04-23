@@ -15,6 +15,7 @@ type HeartButtonProps = {
   saved: boolean;
   onPress: () => void;
   size?: 'default' | 'compact';
+  variant?: 'default' | 'ghost';
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -23,6 +24,7 @@ export default function HeartButton({
   saved,
   onPress,
   size = 'default',
+  variant = 'default',
 }: HeartButtonProps) {
   const scale = useSharedValue(saved ? 1 : 0.95);
   const translateY = useSharedValue(0);
@@ -73,6 +75,7 @@ export default function HeartButton({
       style={({ pressed }) => [
         styles.button,
         size === 'compact' && styles.buttonCompact,
+        variant === 'ghost' && styles.buttonGhost,
         pressed && styles.buttonPressed,
       ]}
     >
@@ -114,5 +117,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.16,
     shadowRadius: 10,
     elevation: 3,
+  },
+  buttonGhost: {
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
 });
