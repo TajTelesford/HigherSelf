@@ -1,9 +1,9 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MoodCalendar } from '@/components/MoodCalendar';
 import { MoodPicker, type MoodOption } from '@/components/MoodPicker';
 import { TodaysMood } from '@/components/TodaysMood';
 import { STORAGE_KEYS } from '@/data/HigherSelf_StorageKeys';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -109,12 +109,9 @@ export default function MoodScreen() {
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.prompt}>How is your mood today?</Text>
-          <Text style={styles.helperText}>
-            {isEditingMood
-              ? 'Choose a new mood for today. Saving will update what is stored on this device.'
-              : 'Pick one feeling for today. Once selected, it locks until tomorrow.'}
-          </Text>
+          {shouldShowPicker ? (
+            <Text style={styles.prompt}>How is your mood today?</Text>
+          ) : null}
 
           {loading ? (
             <View style={styles.loadingState}>
@@ -203,6 +200,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     lineHeight: 34,
+    paddingBottom: 28,
   },
   helperText: {
     color: '#C6CDD8',
