@@ -252,38 +252,15 @@ export default function PracticeAffirmationsScreen() {
 
                 <Text style={styles.heroTitle}>Ready To Record</Text>
                 <Text style={styles.heroCopy}>
-                  Your affirmation queue is ready. Tap the mic to open the recorder
-                  and capture these affirmations in your own voice.
+                  Your affirmation queue is ready. Open the recorder and capture
+                  these affirmations in your own voice.
                 </Text>
-
-                <Pressable
-                  onPress={goToRecordAffirmations}
-                  style={({ pressed }) => [
-                    styles.microphoneBadgeOuter,
-                    pressed && styles.microphoneBadgePressed,
-                  ]}
-                >
-                  <View style={styles.microphoneBadgeMiddle}>
-                    <View style={styles.microphoneBadge}>
-                      <MaterialCommunityIcons
-                        color="#F5F7FA"
-                        name="microphone"
-                        size={34}
-                      />
-                    </View>
-                  </View>
-                </Pressable>
 
                 <View style={styles.heroActionRow}>
                   <Pressable
                     onPress={goToRecordAffirmations}
                     style={styles.heroPrimaryButton}
                   >
-                    <MaterialCommunityIcons
-                      color="#FFF8E7"
-                      name="microphone-outline"
-                      size={18}
-                    />
                     <Text style={styles.heroPrimaryButtonText}>Open Recorder</Text>
                   </Pressable>
 
@@ -571,48 +548,9 @@ const styles = StyleSheet.create({
     marginTop: 12,
     maxWidth: 310,
   },
-  microphoneBadgeOuter: {
-    width: 128,
-    height: 128,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-    marginTop: 26,
-    marginBottom: 22,
-    backgroundColor: 'rgba(124, 58, 237, 0.10)',
-    borderWidth: 1,
-    borderColor: 'rgba(246, 196, 83, 0.14)',
-  },
-  microphoneBadgeMiddle: {
-    width: 98,
-    height: 98,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-  },
-  microphoneBadge: {
-    width: 72,
-    height: 72,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#7C3AED',
-    borderWidth: 1,
-    borderColor: 'rgba(246, 196, 83, 0.34)',
-    shadowColor: '#7C3AED',
-    shadowOpacity: 0.45,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-  },
-  microphoneBadgePressed: {
-    transform: [{ scale: 0.96 }],
-  },
   heroActionRow: {
-    gap: 12,
+    paddingTop: 24,
+    gap: 20,
   },
   heroPrimaryButton: {
     height: 56,
