@@ -24,9 +24,9 @@ const CONTENT_ROWS: MyContentCardProps[][] = [
       },
     },
     {
-      title: 'History',
-      href: '/my-content/history',
-      icon: { family: 'ionicons' as const, name: 'hourglass-outline' as const },
+      title: 'Recorded\naffirmations',
+      href: '/my-content/recorded-affirmations',
+      icon: { family: 'ionicons' as const, name: 'play-outline' as const },
     },
   ],
 ];

@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function HistoryScreen() {
+export default function RecordedAffirmationsScreen() {
   return (
    <View style={styles.backdrop}>
       <Pressable style={styles.dismissArea} onPress={() => router.back()} />
@@ -12,7 +12,7 @@ export default function HistoryScreen() {
         <View style={styles.handle} />
 
         <View style={styles.header}>
-          <Text style={styles.title}>History</Text>
+          <Text style={styles.title}>Recorded Affirmations</Text>
 
           <Pressable onPress={() => router.back()} style={styles.closeButton}>
             <Ionicons color="#F5F7FA" name="close" size={22} />
@@ -20,7 +20,7 @@ export default function HistoryScreen() {
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.contentText}>History</Text>
+          <Text style={styles.contentText}>Recorded Affirmations</Text>
         </View>
       </SafeAreaView>
     </View>

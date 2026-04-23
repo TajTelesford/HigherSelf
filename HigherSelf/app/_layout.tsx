@@ -113,7 +113,7 @@ export default function RootLayout() {
                 }}
               />
               <Stack.Screen
-                name="my-content/history"
+                name="my-content/recorded-affirmations"
                 options={{
                   presentation: 'transparentModal',
                   animation: 'slide_from_bottom',
