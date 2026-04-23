@@ -2,6 +2,7 @@ import CustomChooseAffirmationAlert from '@/components/CustomChooseAffirmationAl
 import RecordMicrophoneButton from '@/components/RecordMicrophoneButton';
 import { STORAGE_KEYS } from '@/data/HigherSelf_StorageKeys';
 import type { Affirmation } from '@/types/affirmations';
+import type { VoiceRecordingEntry } from '@/types/recordings';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -40,15 +41,6 @@ type StoredAffirmationLike =
       affirmation?: string;
       category?: string;
     };
-
-type VoiceRecordingEntry = {
-  id: string;
-  uri: string;
-  fileName: string;
-  durationMillis: number;
-  createdAt: string;
-  affirmations: Affirmation[];
-};
 
 type CarouselItem =
   | {
