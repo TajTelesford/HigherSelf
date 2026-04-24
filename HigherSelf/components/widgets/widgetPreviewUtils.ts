@@ -1,17 +1,27 @@
 import type { WidgetConfiguration } from '@/context/WidgetsContext';
 import { getAffirmationsForWidgetTopics } from '@/data/widgetTopics';
 import type { Affirmation } from '@/types/affirmations';
+import type { AffirmationCollection } from '@/types/collections';
 import { THEMES } from '../../data/themes';
 
 export type WidgetPreviewKind = 'medium';
 
 export function getPreviewAffirmation(
   configuration: WidgetConfiguration,
-  customAffirmations: Affirmation[]
+  customAffirmations: Affirmation[],
+  collections: AffirmationCollection[]
 ) {
-  const affirmations = getAffirmationsForWidgetTopics(configuration.topicIds, {
-    customAffirmations,
-  });
+  const selectedCollections = configuration.collectionIds.length
+    ? collections.filter((collection) => configuration.collectionIds.includes(collection.id))
+    : [];
+  const selectedCollectionAffirmations = selectedCollections.flatMap(
+    (collection) => collection.affirmations
+  );
+  const affirmations = selectedCollectionAffirmations.length
+    ? selectedCollectionAffirmations
+    : getAffirmationsForWidgetTopics(configuration.topicIds, {
+        customAffirmations,
+      });
 
   if (affirmations.length === 0) {
     return 'Your affirmations will appear here.';

@@ -1,5 +1,6 @@
 import type { WidgetConfiguration } from '@/context/WidgetsContext';
 import type { Affirmation } from '@/types/affirmations';
+import type { AffirmationCollection } from '@/types/collections';
 import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -120,6 +121,7 @@ function DevicePreviewCard({
 
 export function WidgetHomeContent({
   activeWidget,
+  collections,
   customAffirmations,
   onDeleteWidget,
   onOpenDetailScreen,
@@ -128,6 +130,7 @@ export function WidgetHomeContent({
   widgetConfigurations,
 }: {
   activeWidget: WidgetConfiguration;
+  collections: AffirmationCollection[];
   customAffirmations: Affirmation[];
   onDeleteWidget: () => void;
   onOpenDetailScreen: (screen: WidgetDetailScreen) => void;
@@ -188,7 +191,7 @@ export function WidgetHomeContent({
           }}
           renderItem={({ item }: ListRenderItemInfo<WidgetConfiguration>) => (
             <DevicePreviewCard
-              affirmation={getPreviewAffirmation(item, customAffirmations)}
+              affirmation={getPreviewAffirmation(item, customAffirmations, collections)}
               pageWidth={previewViewportWidth}
               showBorder={item.showBorder}
               themeId={item.themeId}

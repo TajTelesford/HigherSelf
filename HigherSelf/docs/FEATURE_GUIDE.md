@@ -122,6 +122,31 @@ Main behaviors:
 - changes the visual background on the home screen
 - affects the background used in the share card flow
 
+## Widgets
+
+Main files:
+
+- `app/modals/widgets.tsx`
+- `context/WidgetsContext.tsx`
+- `components/widgets/WidgetHomeContent.tsx`
+- `components/widgets/WidgetSettingsCard.tsx`
+- `components/widgets/WidgetTopicsPanel.tsx`
+- `components/widgets/widgetPreviewUtils.ts`
+
+This feature lets the user create and configure home-screen widget variants inside the app.
+
+Main behaviors:
+
+- create and delete widget configurations
+- preview the widget with the currently selected theme and border options
+- choose how often the widget refreshes
+- choose a widget theme
+- choose a collection for the widget’s affirmation source
+
+Important note:
+
+The Topics flow is now collection-driven. A widget stores selected `collectionIds`, then resolves a random affirmation from those collections when rendering the preview. If no selected collection produces affirmations, the widget falls back to the legacy `general` topic source.
+
 ## Affirmation Sharing
 
 Main files:

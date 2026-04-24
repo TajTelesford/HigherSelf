@@ -15,6 +15,7 @@ import { THEMES } from '@/data/themes';
 export type WidgetRefreshFrequency = 'daily' | 'frequently' | 'hourly' | 'occasionally';
 
 export type WidgetConfiguration = {
+  collectionIds: string[];
   enabled: boolean;
   id: string;
   name: string;
@@ -41,6 +42,7 @@ const DEFAULT_WIDGET_CONFIGURATION: WidgetConfiguration = {
   id: 'widget-1',
   name: 'Widget configuration #1',
   enabled: true,
+  collectionIds: [],
   topicIds: ['general'],
   themeId: THEMES[0]?.id ?? '',
   showBorder: true,
@@ -68,6 +70,11 @@ const normalizeWidgetConfiguration = (
     Array.isArray(candidate.topicIds) && candidate.topicIds.includes('general')
       ? ['general']
       : ['general'];
+  const collectionIds = Array.isArray(candidate.collectionIds)
+    ? candidate.collectionIds.filter(
+        (collectionId): collectionId is string => typeof collectionId === 'string'
+      )
+    : [];
 
   return {
     id: typeof candidate.id === 'string' ? candidate.id : `widget-${index + 1}`,
@@ -76,6 +83,7 @@ const normalizeWidgetConfiguration = (
         ? candidate.name
         : `Widget configuration #${index + 1}`,
     enabled: typeof candidate.enabled === 'boolean' ? candidate.enabled : true,
+    collectionIds,
     topicIds,
     themeId:
       typeof candidate.themeId === 'string' &&

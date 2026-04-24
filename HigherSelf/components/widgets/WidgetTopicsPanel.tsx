@@ -1,7 +1,7 @@
 import type { WidgetConfiguration } from '@/context/WidgetsContext';
-import { WIDGET_TOPICS } from '@/data/widgetTopics';
+import { useAffirmationCollections } from '@/context/AffirmationCollectionsContext';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export function WidgetTopicsPanel({
   activeWidget,
@@ -13,56 +13,77 @@ export function WidgetTopicsPanel({
     updates: Partial<Omit<WidgetConfiguration, 'id'>>
   ) => void;
 }) {
+  const { collections, loading } = useAffirmationCollections();
+
   return (
-    <View style={styles.detailContent}>
-      <Text style={styles.intro}>Choose which affirmation topics feed this widget</Text>
+    <ScrollView
+      bounces={false}
+      contentContainerStyle={styles.detailContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <Text style={styles.intro}>Choose a collection for this widget to pull affirmations from</Text>
 
-      <View style={styles.topicCard}>
-        {WIDGET_TOPICS.map((topic, index) => {
-          const selected = activeWidget.topicIds.includes(topic.id);
+      {loading ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>Loading collections...</Text>
+        </View>
+      ) : collections.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>No collections yet.</Text>
+          <Text style={styles.emptyMessage}>
+            Create a collection in My Content, add affirmations to it, then select it here.
+          </Text>
+        </View>
+      ) : (
+        <View style={styles.topicCard}>
+          {collections.map((collection, index) => {
+            const selected = activeWidget.collectionIds.includes(collection.id);
+            const affirmationCount = collection.affirmations.length;
 
-          return (
-            <View key={topic.id}>
-              <Pressable
-                onPress={() =>
-                  onUpdateWidget(activeWidget.id, {
-                    topicIds: [topic.id],
-                  })
-                }
-                style={({ pressed }) => [styles.topicRow, pressed && styles.rowPressed]}
-              >
-                <View style={styles.topicTextWrap}>
-                  <Text style={styles.topicTitle}>{topic.label}</Text>
-                  <Text style={styles.topicDescription}>{topic.description}</Text>
-                </View>
-                <View style={[styles.followPill, selected && styles.followPillSelected]}>
-                  <Text
-                    style={[
-                      styles.followPillText,
-                      selected && styles.followPillTextSelected,
-                    ]}
-                  >
-                    {selected ? 'Following' : 'Follow'}
-                  </Text>
-                </View>
-              </Pressable>
-              {index < WIDGET_TOPICS.length - 1 ? <View style={styles.topicDivider} /> : null}
-            </View>
-          );
-        })}
-      </View>
+            return (
+              <View key={collection.id}>
+                <Pressable
+                  onPress={() =>
+                    onUpdateWidget(activeWidget.id, {
+                      collectionIds: [collection.id],
+                    })
+                  }
+                  style={({ pressed }) => [styles.topicRow, pressed && styles.rowPressed]}
+                >
+                  <View style={styles.topicTextWrap}>
+                    <Text style={styles.topicTitle}>{collection.name}</Text>
+                    <Text style={styles.topicDescription}>
+                      {affirmationCount} affirmation{affirmationCount === 1 ? '' : 's'}
+                    </Text>
+                  </View>
+                  <View style={[styles.followPill, selected && styles.followPillSelected]}>
+                    <Text
+                      style={[
+                        styles.followPillText,
+                        selected && styles.followPillTextSelected,
+                      ]}
+                    >
+                      {selected ? 'Selected' : 'Choose'}
+                    </Text>
+                  </View>
+                </Pressable>
+                {index < collections.length - 1 ? <View style={styles.topicDivider} /> : null}
+              </View>
+            );
+          })}
+        </View>
+      )}
 
       <Text style={styles.helperCopy}>
-        General currently pulls from the built-in affirmations in your data folder and any
-        custom affirmations you have created.
+        The widget will refresh with a random affirmation from the collection you select.
       </Text>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   detailContent: {
-    flex: 1,
+    flexGrow: 1,
     paddingBottom: 24,
   },
   intro: {
@@ -136,6 +157,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 23,
     marginTop: 18,
+  },
+  emptyState: {
+    borderRadius: 28,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    marginTop: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 28,
+    alignItems: 'center',
+  },
+  emptyTitle: {
+    color: '#F5F7FA',
+    fontSize: 22,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  emptyMessage: {
+    color: 'rgba(245, 247, 250, 0.72)',
+    fontSize: 16,
+    lineHeight: 23,
+    marginTop: 10,
+    textAlign: 'center',
   },
   rowPressed: {
     opacity: 0.88,
