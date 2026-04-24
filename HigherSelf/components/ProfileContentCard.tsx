@@ -29,18 +29,6 @@ export function ProfileContentCard({
             size={56}
             color="rgba(188, 220, 255, 0.9)"
           />
-          <Ionicons
-            name="sparkles"
-            size={14}
-            color="rgba(235, 245, 255, 0.82)"
-            style={styles.sparkleTop}
-          />
-          <Ionicons
-            name="sparkles"
-            size={10}
-            color="rgba(235, 245, 255, 0.7)"
-            style={styles.sparkleBottom}
-          />
         </View>
       </View>
     </Pressable>
@@ -88,16 +76,5 @@ const styles = StyleSheet.create({
     height: 84,
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
-  },
-  sparkleTop: {
-    position: 'absolute',
-    top: 10,
-    right: 6,
-  },
-  sparkleBottom: {
-    position: 'absolute',
-    bottom: 10,
-    left: 8,
   },
 });

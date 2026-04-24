@@ -1,4 +1,4 @@
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -25,18 +25,6 @@ export const UnlockAllCardSection = ({text}: UnlockAllCardSectionProps) => {
                   name="diamond-stone"
                   size={54}
                   color="rgba(220, 112, 234, 0.72)"
-                />
-                <Ionicons
-                  name="sparkles"
-                  size={14}
-                  color="rgba(31, 24, 32, 0.65)"
-                  style={styles.upgradeSparkleTop}
-                />
-                <Ionicons
-                  name="sparkles"
-                  size={10}
-                  color="rgba(31, 24, 32, 0.55)"
-                  style={styles.upgradeSparkleBottom}
                 />
               </View>
             </View>
@@ -87,17 +75,6 @@ const styles = StyleSheet.create({
     height: 84,
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
-  },
-  upgradeSparkleTop: {
-    position: 'absolute',
-    top: 10,
-    right: 6,
-  },
-  upgradeSparkleBottom: {
-    position: 'absolute',
-    bottom: 10,
-    left: 8,
   },
 
 });

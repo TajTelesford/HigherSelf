@@ -407,14 +407,13 @@ export default function RecordAffirmationsScreen() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.heroCard}>
-              <View style={styles.heroTopRow}>
-                <Text style={styles.heroEyebrow}>Your Voice</Text>
+                <View style={styles.heroTopRow}>
+                  <Text style={styles.heroEyebrow}>Your Voice</Text>
 
-                <Pressable onPress={() => setShowPicker(true)} style={styles.editQueueButton}>
-                  <Ionicons color="#D8CCFF" name="sparkles" size={16} />
-                  <Text style={styles.editQueueButtonText}>Edit Queue</Text>
-                </Pressable>
-              </View>
+                  <Pressable onPress={() => setShowPicker(true)} style={styles.editQueueButton}>
+                    <Text style={styles.editQueueButtonText}>Edit Queue</Text>
+                  </Pressable>
+                </View>
               <Text style={styles.heroTitle}>Speak your affirmations with conviction.</Text>
               <Text style={styles.heroCopy}>{statusMessage}</Text>
 

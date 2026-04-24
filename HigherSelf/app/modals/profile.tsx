@@ -32,18 +32,6 @@ const PROFILE_CARDS: ProfileCard[] = [
   },
 ];
 
-const PROFILE_CARD_ROWS = PROFILE_CARDS.reduce<ProfileCard[][]>((rows, card, index) => {
-  if (index % 2 === 0) {
-    rows.push([card]);
-  } else {
-    rows[rows.length - 1].push(card);
-  }
-
-  return rows;
-}, []);
-
-
-
 export default function ProfileScreen() {
   return (
     <View style={styles.backdrop}>
@@ -79,15 +67,11 @@ export default function ProfileScreen() {
           <Text style={styles.sectionTitle}>Customize the app</Text>
 
           <View style={styles.grid}>
-            {PROFILE_CARD_ROWS.map((row, index) => (
-              <View key={`profile-row-${index}`} style={styles.gridRow}>
-                {row.map((card) => (
-                  <ProfileCardTile key={card.title} {...card} />
-                ))}
-              </View>
+            {PROFILE_CARDS.map((card) => (
+              <ProfileCardTile key={card.title} {...card} />
             ))}
           </View>
-          <LibraryContentCard text="Jump into your saved content hub and manage everything from one place." />
+          <LibraryContentCard content="Jump into your saved content hub and manage everything from one place." />
 
         </ScrollView>
       </SafeAreaView>
@@ -157,14 +141,9 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   grid: {
-    gap: 16,
-  },
-  gridRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-evenly',
-    alignContent: 'center',
-    alignItems: 'center',
-    gap: 0,
+    gap: 8,
   },
-  
 });

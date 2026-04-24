@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Share, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
 import { useStreak, type StreakDay } from '@/context/StreakContext';
 
@@ -116,8 +116,6 @@ export default function UserStreak({
           <View style={styles.ring}>
             <Text style={styles.ringValue}>{resolvedStreakCount}</Text>
           </View>
-
-          <Ionicons name="sparkles" size={19} color="#F4DED8" style={styles.sparkle} />
         </View>
 
         <View style={styles.mainColumn}>
@@ -168,7 +166,6 @@ const styles = StyleSheet.create({
     width: 74,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    position: 'relative',
     paddingTop: 16,
   },
   ring: {
@@ -186,11 +183,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: '700',
     letterSpacing: -1,
-  },
-  sparkle: {
-    position: 'absolute',
-    bottom: 4,
-    right: 3,
   },
   mainColumn: {
     flex: 1,

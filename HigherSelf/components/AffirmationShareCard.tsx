@@ -22,7 +22,6 @@ export function AffirmationShareCard({
     <View collapsable={false} style={styles.frame}>
       <ImageBackground resizeMode="cover" source={theme.image} style={styles.card}>
         <View style={styles.overlay} />
-        <View style={styles.glow} />
 
         <View style={styles.header}>
           <Text style={styles.brand}>HigherSelf</Text>
@@ -65,15 +64,6 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(12, 18, 32, 0.42)',
-  },
-  glow: {
-    position: 'absolute',
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    backgroundColor: 'rgba(255, 255, 255, 0.16)',
-    top: 92,
-    right: -54,
   },
   header: {
     gap: 14,
