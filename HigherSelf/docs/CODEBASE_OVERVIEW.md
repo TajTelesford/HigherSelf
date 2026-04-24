@@ -13,6 +13,7 @@ This is the routing layer. Because the app uses Expo Router, every file in `app/
 - `app/_layout.tsx`: Root app shell. Composes providers and defines the main stack.
 - `app/(tabs)/`: Primary tab routes. The current app behavior is mostly driven by `index.tsx`.
 - `app/modals/`: Overlay screens such as profile, library, themes, mood, practice, recording, and streak.
+- `app/modals/widgets.tsx`: Widget configuration sheet with home, topics, theme, and refresh detail views.
 - `app/my-content/`: The personal content hub for favorites, collections, user-created affirmations, and recordings.
 
 ### `components/`
@@ -35,6 +36,7 @@ App-wide state containers using React Context and hooks. Most contexts load and 
 - `CustomAffirmationsContext.tsx`
 - `StreakContext.tsx`
 - `ThemeContextProvider.tsx`
+- `WidgetsContext.tsx`
 
 ### `data/`
 
@@ -42,6 +44,7 @@ Static or semi-static app data.
 
 - `affirmation.ts`: Seed affirmations shown on the home screen.
 - `themes.ts`: Available background themes.
+- `widgetTopics.ts`: Legacy widget topic definitions and fallback affirmation source resolution.
 - `HigherSelf_StorageKeys.ts`: Shared storage key registry.
 
 ### `hooks/`
@@ -59,6 +62,7 @@ TypeScript models for the app’s main data objects:
 - affirmations
 - collections
 - recordings
+- widget configurations
 
 ## App Entry Flow
 
@@ -84,6 +88,7 @@ The app is organized around a few key user journeys:
 6. Review recordings later.
 7. Track consistency with a streak UI.
 8. Share affirmations as themed cards.
+9. Configure home-screen widgets and connect them to a user collection.
 
 ## Design Pattern Used Across The App
 
@@ -93,6 +98,13 @@ A common pattern appears throughout the codebase:
 - a context owns durable user data
 - a reusable component renders repeated UI
 - AsyncStorage persists state between launches
+
+The widget flow follows the same pattern:
+
+- `WidgetsContext` owns persisted widget state
+- `AffirmationCollectionsContext` owns the collection contents
+- widget configs reference collections by id instead of copying affirmations
+- widget preview helpers resolve the final content pool when rendering
 
 This keeps screens fairly lean and pushes data logic into dedicated providers.
 

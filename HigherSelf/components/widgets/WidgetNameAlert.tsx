@@ -13,31 +13,32 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
 
-type CustomNameCollectionAlertProps = {
-  visible: boolean;
+type WidgetNameAlertProps = {
+  initialName: string;
   onClose: () => void;
   onSave: (name: string) => void;
+  visible: boolean;
 };
 
-export function CustomNameCollectionAlert({
-  visible,
+export function WidgetNameAlert({
+  initialName,
   onClose,
   onSave,
-}: CustomNameCollectionAlertProps) {
-  const [name, setName] = useState('My new collection');
+  visible,
+}: WidgetNameAlertProps) {
+  const [name, setName] = useState(initialName);
 
   useEffect(() => {
     if (visible) {
-      setName('My new collection');
+      setName(initialName);
     }
-  }, [visible]);
+  }, [initialName, visible]);
 
   const trimmedName = name.trim();
   const canSave = trimmedName.length > 0;
 
   const handleSave = () => {
     if (!canSave) return;
-
     onSave(trimmedName);
   };
 
@@ -45,6 +46,8 @@ export function CustomNameCollectionAlert({
     <Modal
       animationType="slide"
       onRequestClose={onClose}
+      presentationStyle="overFullScreen"
+      statusBarTranslucent
       transparent
       visible={visible}
     >
@@ -52,7 +55,7 @@ export function CustomNameCollectionAlert({
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.backdrop}
       >
-        <Pressable style={styles.dismissArea} onPress={onClose} />
+        <Pressable onPress={onClose} style={styles.dismissArea} />
 
         <SafeAreaView edges={['bottom']} style={styles.sheet}>
           <View style={styles.header}>
@@ -64,19 +67,18 @@ export function CustomNameCollectionAlert({
               <Ionicons color="#F5F7FA" name="chevron-back" size={32} />
             </Pressable>
 
-            <Text style={styles.title}>New collection</Text>
+            <Text style={styles.title}>Rename widget</Text>
           </View>
 
           <View style={styles.content}>
             <Text style={styles.description}>
-              Enter a name for your new collection.
+              Choose a new name for this widget configuration.
             </Text>
-            <Text style={styles.description}>You can rename it later.</Text>
 
             <TextInput
               autoFocus
               onChangeText={setName}
-              placeholder="My new collection"
+              placeholder="Widget configuration"
               placeholderTextColor="rgba(245, 247, 250, 0.48)"
               returnKeyType="done"
               selectionColor="#F5F7FA"
@@ -103,7 +105,7 @@ export function CustomNameCollectionAlert({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.24)',
+    backgroundColor: 'transparent',
     justifyContent: 'flex-end',
   },
   dismissArea: {
@@ -115,13 +117,14 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 20,
-    paddingTop: 34,
+    paddingTop: 28,
     paddingBottom: 28,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 28,
+    paddingTop: 4,
   },
   backButton: {
     width: 38,
@@ -135,6 +138,7 @@ const styles = StyleSheet.create({
     color: '#F5F7FA',
     fontSize: 32,
     fontWeight: '700',
+    lineHeight: 40,
     letterSpacing: 0.5,
   },
   content: {
@@ -142,9 +146,8 @@ const styles = StyleSheet.create({
   },
   description: {
     color: 'rgba(245, 247, 250, 0.82)',
-    fontSize: 29,
-    lineHeight: 44,
-    letterSpacing: 2.8,
+    fontSize: 24,
+    lineHeight: 34,
   },
   input: {
     minHeight: 78,
@@ -155,7 +158,7 @@ const styles = StyleSheet.create({
     color: '#F5F7FA',
     fontSize: 24,
     fontWeight: '500',
-    marginTop: 58,
+    marginTop: 34,
     paddingHorizontal: 28,
   },
   saveButton: {
@@ -177,4 +180,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CustomNameCollectionAlert;
+export default WidgetNameAlert;

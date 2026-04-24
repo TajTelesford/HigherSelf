@@ -1,5 +1,3 @@
-import { useThemeSelection } from '@/context/ThemeContextProvider';
-import { THEMES } from '@/data/themes';
 import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
 import { router } from 'expo-router';
@@ -11,6 +9,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useThemeSelection } from '../../context/ThemeContextProvider';
+import { THEMES } from '../../data/themes';
 
 export default function ThemesScreen() {
   const { selectedThemeId, setSelectedThemeId } = useThemeSelection();

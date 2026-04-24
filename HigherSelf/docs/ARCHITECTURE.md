@@ -11,6 +11,8 @@ The app uses Expo Router.
 It wraps the app with:
 
 - `ThemeContextProvider`
+- `RemindersProvider`
+- `WidgetsProvider`
 - `StreakProvider`
 - `SavedAffirmationsProvider`
 - `CustomAffirmationsProvider`
@@ -38,6 +40,7 @@ This app’s data model is relatively small and centered around user-owned local
 - saved affirmations
 - custom affirmations
 - collections
+- widget configurations
 - streak data
 - selected theme
 
@@ -49,6 +52,7 @@ These are stable, app-wide concerns, so context is a good fit.
 - `SavedAffirmationContext`: Stores the user’s saved affirmations.
 - `CustomAffirmationsContext`: Stores user-authored affirmations.
 - `AffirmationCollectionsContext`: Stores named collections of affirmations.
+- `WidgetsContext`: Stores widget configurations, active widget selection, and widget-specific settings.
 - `StreakContext`: Tracks day-based streak logic and a weekly streak view model.
 
 ## Persistence Model
@@ -65,6 +69,14 @@ Audio recordings use a different persistence path:
 
 - files are saved to the app document directory through Expo FileSystem
 - metadata is stored in AsyncStorage
+
+Widget configurations are also stored in AsyncStorage. The widget model is reference-based:
+
+- a widget stores `collectionIds`
+- collections continue to own the actual `Affirmation[]`
+- widget preview resolution looks up the selected collections at render time
+
+This avoids duplicating affirmation data inside widget state and keeps widgets in sync when a collection changes.
 
 ## Sharing Architecture
 
@@ -108,6 +120,19 @@ Examples:
 - favorites screen uses `SavedAffirmationCard` plus `CollectionPickerAlert`
 - collections screen uses `CollectionFolderCard` plus `CustomNameCollectionAlert`
 - profile screen composes cards like `UserStreak`, `ProfileCardTile`, and `LibraryContentCard`
+- widgets modal composes a home screen plus detail panels for topics, theme, and refresh settings
+
+## Widget Architecture
+
+The widget customization flow is split across a few focused pieces:
+
+1. `app/modals/widgets.tsx` coordinates the widget sheet and switches between `home`, `topics`, `theme`, and `refresh` detail screens.
+2. `context/WidgetsContext.tsx` owns widget configuration state and persistence.
+3. `components/widgets/WidgetHomeContent.tsx` renders the live device preview and settings card.
+4. `components/widgets/WidgetTopicsPanel.tsx` lets the user choose which collection feeds the widget.
+5. `components/widgets/widgetPreviewUtils.ts` resolves the actual affirmation pool and picks the preview affirmation based on refresh frequency.
+
+The content-source logic now prefers selected collections. If no collection is selected, or the selected collection is empty, the widget falls back to the legacy `general` topic source.
 
 ## Theme And Visual Architecture
 

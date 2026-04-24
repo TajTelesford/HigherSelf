@@ -38,6 +38,28 @@ Fields:
 - `createdAt: string`
 - `affirmations: Affirmation[]`
 
+### `WidgetConfiguration`
+
+Defined in `context/WidgetsContext.tsx`.
+
+Fields:
+
+- `id: string`
+- `name: string`
+- `enabled: boolean`
+- `themeId: string`
+- `showBorder: boolean`
+- `refreshFrequency: 'daily' | 'frequently' | 'hourly' | 'occasionally'`
+- `topicIds: WidgetTopicId[]`
+- `collectionIds: string[]`
+
+Notes:
+
+- `collectionIds` is the current widget-specific content source for the Topics flow.
+- The widget stores collection ids, not copied affirmations.
+- `topicIds` is still kept for compatibility and fallback.
+- If a widget has no selected collections, or its selected collections resolve to no affirmations, preview generation falls back to the `general` topic pool.
+
 ## AsyncStorage Keys
 
 Defined in `data/HigherSelf_StorageKeys.ts`.
@@ -51,6 +73,7 @@ Defined in `data/HigherSelf_StorageKeys.ts`.
 - `practice_affirmation_prompt_date`
 - `voice_recordings`
 - `user_streak`
+- `widget_configurations`
 
 ## Context Providers
 
@@ -116,6 +139,19 @@ Responsibilities:
 - preload theme images for smoother rendering
 - persist the selected theme id to AsyncStorage
 
+### `WidgetsProvider`
+
+File: `context/WidgetsContext.tsx`
+
+Responsibilities:
+
+- load widget configurations from AsyncStorage
+- normalize legacy widget shapes on read
+- track the active widget id
+- create and delete widget configurations
+- update widget settings such as theme, refresh rate, border, enabled state, and selected collection ids
+- persist widget configurations automatically
+
 ## Local File Storage
 
 Recorded audio files are saved into the app document directory instead of AsyncStorage.
@@ -151,3 +187,20 @@ This split is important because binary audio files should not be stored directly
 3. The hook ensures the selected theme asset is loaded.
 4. The card uses the currently selected theme.
 5. The card is captured as an image and handed to the native share sheet.
+
+### Selecting A Widget Collection
+
+1. User taps `Topics` from the widget settings sheet.
+2. The widgets modal opens the widget topics detail screen.
+3. `WidgetTopicsPanel` reads collections from `AffirmationCollectionsContext`.
+4. The user selects a collection.
+5. `WidgetsContext` updates the active widget with `collectionIds: [selectedCollectionId]`.
+6. The persistence effect writes the updated widget configurations to AsyncStorage.
+
+### Resolving A Widget Preview Affirmation
+
+1. `WidgetHomeContent` asks `getPreviewAffirmation` for the active widget preview text.
+2. The helper checks `collectionIds` on the widget configuration.
+3. If matching collections exist and contain affirmations, their affirmations become the source pool.
+4. Otherwise the helper falls back to the existing `topicIds` source, currently `general`.
+5. A seeded selection based on `refreshFrequency` chooses the displayed affirmation.

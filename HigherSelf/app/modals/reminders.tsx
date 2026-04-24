@@ -95,9 +95,9 @@ export default function RemindersScreen() {
 
         <Pressable
           onPress={() => Alert.alert('COMING SOON')}
-          style={({ pressed }) => [styles.footerButton, pressed && styles.footerButtonPressed]}
+          style={styles.saveButton}
         >
-          <Text style={styles.footerButtonText}>Unlock more reminders</Text>
+          <Text style={styles.saveButtonText}>Unlock more reminders</Text>
         </Pressable>
       </SafeAreaView>
     </View>
@@ -240,5 +240,19 @@ const styles = StyleSheet.create({
     color: '#0B0F1A',
     fontSize: 17,
     fontWeight: '800',
+  },
+  saveButton: {
+    height: 50,
+    borderRadius: 39,
+    backgroundColor: '#F5F7FA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto',
+  },
+  saveButtonText: {
+    color: '#0B0F1A',
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: 2,
   },
 });
