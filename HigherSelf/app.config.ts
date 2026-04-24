@@ -39,6 +39,7 @@ const config: ExpoConfig = {
   icon: defaultIconPath,
   ios: {
     ...baseConfig.ios,
+    deploymentTarget: '15.1',
     icon: defaultIconPath,
   },
   android: {
