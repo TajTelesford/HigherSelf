@@ -1,10 +1,11 @@
+import { Asset } from 'expo-asset';
 import * as Sharing from 'expo-sharing';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Share, StyleSheet, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import { useThemeSelection } from '../context/ThemeContextProvider';
 
-import { AffirmationShareCard } from '@/components/AffirmationShareCard';
+import { AffirmationShareCard } from '../components/AffirmationShareCard';
 
 type SharePayload = {
   affirmation: string;
@@ -23,8 +24,14 @@ const waitForPaint = () =>
     });
   });
 
+const wait = (durationMs: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, durationMs);
+  });
+
 export function useAffirmationShare() {
   const { selectedTheme } = useThemeSelection();
+  const selectedThemeImage = selectedTheme.image;
   const shareCardRef = useRef<View | null>(null);
   const [pendingShare, setPendingShare] = useState<PendingShare | null>(null);
 
@@ -45,7 +52,9 @@ export function useAffirmationShare() {
 
     const runShare = async () => {
       try {
+        await Asset.loadAsync([selectedThemeImage]);
         await waitForPaint();
+        await wait(120);
 
         const imageUri = await captureRef(shareCardRef, {
           format: 'png',
@@ -96,7 +105,7 @@ export function useAffirmationShare() {
     return () => {
       isCancelled = true;
     };
-  }, [pendingShare]);
+  }, [pendingShare, selectedThemeImage]);
 
   const shareCardPortal = useMemo(
     () => (
