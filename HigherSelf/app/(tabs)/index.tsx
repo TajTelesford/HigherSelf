@@ -1,5 +1,6 @@
 import { AffirmationsCard } from '@/components/AffirmationsCard';
 import FloatingActionButtons from '@/components/FloatingActionButtons';
+import { useAffirmationShare } from '@/hooks/use-affirmation-share';
 import { Image as ExpoImage } from 'expo-image';
 import {
   FlatList,
@@ -14,6 +15,7 @@ import { AFFIRMATIONS } from '../../data/affirmation';
 export default function HomeScreen() {
   const { height } = useWindowDimensions();
   const { selectedTheme } = useThemeSelection();
+  const { shareAffirmation, shareCardPortal } = useAffirmationShare();
 
   return (
     <View style={styles.container}>
@@ -42,6 +44,12 @@ export default function HomeScreen() {
             id={item.id}
             affirmation={item.text}
             category={item.category}
+            onSharePress={() =>
+              shareAffirmation({
+                affirmation: item.text,
+                category: item.category,
+              })
+            }
             style={[styles.card, { height }]}
           />
         )}
@@ -50,6 +58,7 @@ export default function HomeScreen() {
       />
 
       <FloatingActionButtons />
+      {shareCardPortal}
     </View>
   );
 }

@@ -4,6 +4,7 @@ import { Text } from '@/components/ui/text';
 import { useAffirmationCollections } from '@/context/AffirmationCollectionsContext';
 import { useCustomAffirmations } from '@/context/CustomAffirmationsContext';
 import { useSavedAffirmations } from '@/context/SavedAffirmationContext';
+import { useAffirmationShare } from '@/hooks/use-affirmation-share';
 import type { Affirmation } from '@/types/affirmations';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -29,6 +30,7 @@ export default function MyOwnAffirmationsScreen() {
     useAffirmationCollections();
   const { addCustomAffirmation, customAffirmations, loading } = useCustomAffirmations();
   const { loading: savedLoading } = useSavedAffirmations();
+  const { shareAffirmation, shareCardPortal } = useAffirmationShare();
   const [draftText, setDraftText] = useState('');
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -115,6 +117,12 @@ export default function MyOwnAffirmationsScreen() {
             affirmation={item}
             bookmarked={bookmarkedAffirmationIds.has(item.id)}
             onBookmarkPress={() => setSelectedAffirmation(item)}
+            onSharePress={() =>
+              shareAffirmation({
+                affirmation: item.text,
+                category: item.category,
+              })
+            }
           />
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -257,6 +265,7 @@ export default function MyOwnAffirmationsScreen() {
           toggleAffirmationInCollection(collectionId, affirmation)
         }
       />
+      {shareCardPortal}
     </View>
   );
 }

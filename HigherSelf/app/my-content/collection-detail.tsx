@@ -2,6 +2,7 @@ import { CollectionPickerAlert } from '@/components/CollectionPickerAlert';
 import { SavedAffirmationCard } from '@/components/SavedAffirmationCard';
 import { Text } from '@/components/ui/text';
 import { useAffirmationCollections } from '@/context/AffirmationCollectionsContext';
+import { useAffirmationShare } from '@/hooks/use-affirmation-share';
 import type { Affirmation } from '@/types/affirmations';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -11,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CollectionDetailScreen() {
   const { collectionId } = useLocalSearchParams<{ collectionId?: string }>();
+  const { shareAffirmation, shareCardPortal } = useAffirmationShare();
   const {
     collections,
     deleteCollection,
@@ -97,6 +99,12 @@ export default function CollectionDetailScreen() {
             affirmation={item}
             bookmarked={bookmarkedAffirmationIds.has(item.id)}
             onBookmarkPress={() => setSelectedAffirmation(item)}
+            onSharePress={() =>
+              shareAffirmation({
+                affirmation: item.text,
+                category: item.category,
+              })
+            }
             showSavedDate={false}
           />
         )}
@@ -159,6 +167,7 @@ export default function CollectionDetailScreen() {
           toggleAffirmationInCollection(targetCollectionId, affirmation)
         }
       />
+      {shareCardPortal}
     </View>
   );
 }

@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { getLocalDateKey } from '@/lib/mood-date';
 import { DailyCalendarCell } from './DailyCalendarCell';
 import type { MoodOption } from './MoodPicker';
 
@@ -9,8 +10,6 @@ type MoodCalendarProps = {
 };
 
 const CALENDAR_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-const getTodayKey = () => new Date().toISOString().slice(0, 10);
 
 const getCurrentMonthDates = () => {
   const now = new Date();
@@ -28,7 +27,7 @@ const getCurrentMonthDates = () => {
 
   for (let day = 1; day <= daysInMonth; day += 1) {
     const date = new Date(year, month, day);
-    const dateKey = date.toISOString().slice(0, 10);
+    const dateKey = getLocalDateKey(date);
     calendarCells.push(dateKey);
   }
 
@@ -75,7 +74,7 @@ export function MoodCalendar({
           const moodId = moodsByDate[dateKey];
           const mood = moodOptions.find((option) => option.id === moodId);
           const dayNumber = Number(dateKey.slice(-2));
-          const isToday = dateKey === getTodayKey();
+          const isToday = dateKey === getLocalDateKey();
 
           return (
             <DailyCalendarCell

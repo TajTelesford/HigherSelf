@@ -10,6 +10,7 @@ type SavedAffirmationCardProps = {
   affirmation: Affirmation;
   bookmarked?: boolean;
   onBookmarkPress?: () => void;
+  onSharePress?: () => void | Promise<void>;
   showSavedDate?: boolean;
 };
 
@@ -35,6 +36,7 @@ export function SavedAffirmationCard({
   affirmation,
   bookmarked = false,
   onBookmarkPress,
+  onSharePress,
   showSavedDate = true,
 }: SavedAffirmationCardProps) {
   const { isSaved, toggleSaved } = useSavedAffirmations();
@@ -73,6 +75,7 @@ export function SavedAffirmationCard({
         <Pressable
           accessibilityLabel="Share affirmation"
           accessibilityRole="button"
+          onPress={onSharePress}
           style={styles.iconButton}
         >
           <Ionicons color="#F5F7FA" name="share-outline" size={24} />
