@@ -68,6 +68,13 @@ export default function RootLayout() {
                         }}
                       />
                       <Stack.Screen
+                        name="modals/app-icon"
+                        options={{
+                          presentation: 'transparentModal',
+                          animation: 'slide_from_bottom',
+                        }}
+                      />
+                      <Stack.Screen
                         name="modals/profile"
                         options={{
                           presentation: 'transparentModal',

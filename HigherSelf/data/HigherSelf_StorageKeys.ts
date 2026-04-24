@@ -10,4 +10,5 @@ export const STORAGE_KEYS = {
   REMINDERS: 'reminders',
   VOICE_RECORDINGS: 'voice_recordings',
   USER_STREAK: 'user_streak',
+  SELECTED_APP_ICON: 'selected_app_icon',
 };
