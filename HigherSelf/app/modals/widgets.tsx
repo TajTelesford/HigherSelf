@@ -11,8 +11,9 @@ import {
 } from '@/data/widgetTopics';
 import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -187,6 +188,37 @@ function DevicePreviewCard({
             theme={theme}
           />
         </View>
+        <LinearGradient
+          colors={[
+            'rgba(139, 124, 255, 0.2)',
+            'rgba(139, 124, 255, 0.08)',
+            'rgba(139, 124, 255, 0)',
+          ]}
+          end={{ x: 0, y: 1 }}
+          pointerEvents="none"
+          start={{ x: 0, y: 0 }}
+          style={styles.phoneShellSideFadeLeft}
+        />
+        <LinearGradient
+          colors={[
+            'rgba(139, 124, 255, 0.2)',
+            'rgba(139, 124, 255, 0.08)',
+            'rgba(139, 124, 255, 0)',
+          ]}
+          end={{ x: 0, y: 1 }}
+          pointerEvents="none"
+          start={{ x: 0, y: 0 }}
+          style={styles.phoneShellSideFadeRight}
+        />
+        <LinearGradient
+          colors={[
+            'rgba(20, 28, 43, 0)',
+            'rgba(20, 28, 43, 0.74)',
+            'rgba(18, 24, 38, 0.94)',
+          ]}
+          pointerEvents="none"
+          style={styles.phoneShellBottomFade}
+        />
       </View>
     </View>
   );
@@ -294,11 +326,7 @@ export default function WidgetsScreen() {
   };
 
   const renderHomeScreen = () => (
-    <ScrollView
-      bounces={false}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.homeContent}>
       <Text style={styles.intro}>Set up your Home Screen widget</Text>
 
       <View style={styles.previewShell}>
@@ -338,6 +366,11 @@ export default function WidgetsScreen() {
               theme={getThemeById(item.themeId)}
             />
           )}
+        />
+        <LinearGradient
+          colors={['rgba(18, 24, 38, 0)', 'rgba(18, 24, 38, 0.94)']}
+          pointerEvents="none"
+          style={styles.previewFade}
         />
       </View>
 
@@ -438,12 +471,12 @@ export default function WidgetsScreen() {
       {widgetConfigurations.length > 1 ? (
         <Pressable
           onPress={handleDeleteWidget}
-          style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+          style={styles.saveButton}
         >
-          <Text style={styles.primaryButtonText}>Delete widget</Text>
+          <Text style={styles.saveButtonText}>Delete Widget</Text>
         </Pressable>
       ) : null}
-    </ScrollView>
+    </View>
   );
 
   const renderRefreshScreen = () => (
@@ -522,29 +555,44 @@ export default function WidgetsScreen() {
   const renderThemeScreen = () => (
     <ScrollView
       bounces={false}
-      contentContainerStyle={styles.themeGrid}
+      contentContainerStyle={styles.detailContent}
       showsVerticalScrollIndicator={false}
     >
-      {THEMES.map((theme) => {
-        const selected = theme.id === activeWidget.themeId;
+      <Text style={styles.intro}>Choose the theme shown behind this widget</Text>
 
-        return (
-          <Pressable
-            key={theme.id}
-            onPress={() => updateWidgetConfiguration(activeWidget.id, { themeId: theme.id })}
-            style={({ pressed }) => [
-              styles.themeCard,
-              selected && styles.themeCardSelected,
-              pressed && styles.buttonPressed,
-            ]}
-          >
-            <ExpoImage contentFit="cover" source={theme.image} style={styles.themeCardImage} transition={0} />
-            <View style={styles.themeLabelWrap}>
-              <Text style={styles.themeLabel}>{theme.name}</Text>
+      <View style={styles.themeListCard}>
+        {THEMES.map((theme, index) => {
+          const selected = theme.id === activeWidget.themeId;
+
+          return (
+            <View key={theme.id}>
+              <Pressable
+                onPress={() => updateWidgetConfiguration(activeWidget.id, { themeId: theme.id })}
+                style={({ pressed }) => [styles.themeRow, pressed && styles.rowPressed]}
+              >
+                <View style={styles.themeRowLeft}>
+                  <ExpoImage
+                    contentFit="cover"
+                    source={theme.image}
+                    style={styles.themeThumbnail}
+                    transition={0}
+                  />
+                  <Text style={styles.themeRowLabel}>{theme.name}</Text>
+                </View>
+
+                {selected ? (
+                  <View style={styles.followPillSelected}>
+                    <Text style={styles.followPillTextSelected}>Selected</Text>
+                  </View>
+                ) : (
+                  <Ionicons color="#E6D6D0" name="chevron-forward" size={24} />
+                )}
+              </Pressable>
+              {index < THEMES.length - 1 ? <View style={styles.topicDivider} /> : null}
             </View>
-          </Pressable>
-        );
-      })}
+          );
+        })}
+      </View>
     </ScrollView>
   );
 
@@ -632,7 +680,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: 14,
   },
   iconButton: {
     width: 52,
@@ -649,8 +697,8 @@ const styles = StyleSheet.create({
     fontSize: 29,
     fontWeight: '700',
   },
-  content: {
-    paddingBottom: 28,
+  homeContent: {
+    flex: 1,
   },
   detailContent: {
     flex: 1,
@@ -658,15 +706,15 @@ const styles = StyleSheet.create({
   },
   intro: {
     color: '#F5F7FA',
-    fontSize: 17,
-    lineHeight: 26,
+    fontSize: 16,
+    lineHeight: 22,
     textAlign: 'center',
-    marginBottom: 22,
+    marginBottom: 4,
     paddingHorizontal: 4,
   },
   previewShell: {
-    height: 540,
-    marginTop: 6,
+    height: 250,
+    marginTop: 0,
     overflow: 'hidden',
   },
   previewList: {
@@ -680,28 +728,52 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   phoneShell: {
-    width: '78%',
-    height: 505,
-    borderRadius: 56,
+    width: '72%',
+    height: 300,
+    borderRadius: 48,
     backgroundColor: 'rgba(20, 28, 43, 0.78)',
     borderWidth: 1,
+    borderBottomWidth: 0,
     borderColor: 'rgba(139, 124, 255, 0.2)',
-    paddingHorizontal: 18,
-    paddingTop: 22,
-    paddingBottom: 24,
+    paddingHorizontal: 16,
+    paddingTop: 18,
+    paddingBottom: 20,
+    overflow: 'hidden',
   },
   phoneShellInner: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 14,
   },
   phoneNotch: {
     alignSelf: 'center',
-    width: 132,
-    height: 30,
+    width: 116,
+    height: 24,
     borderRadius: 999,
     backgroundColor: 'rgba(11, 15, 26, 0.92)',
-    marginBottom: 18,
+    marginBottom: 14,
+  },
+  phoneShellSideFadeLeft: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 2,
+  },
+  phoneShellSideFadeRight: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 2,
+  },
+  phoneShellBottomFade: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 120,
   },
   widgetPreview: {
     width: 210,
@@ -719,8 +791,8 @@ const styles = StyleSheet.create({
     borderRadius: 28,
   },
   widgetPreviewMedium: {
-    width: 248,
-    height: 248,
+    width: 220,
+    height: 220,
   },
   widgetPreviewBorder: {
     borderWidth: 4,
@@ -746,23 +818,30 @@ const styles = StyleSheet.create({
   },
   widgetPreviewTextMedium: {
     maxWidth: '78%',
-    fontSize: 18,
-    lineHeight: 23,
+    fontSize: 16,
+    lineHeight: 20,
+  },
+  previewFade: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 100,
   },
   previewHelper: {
     color: 'rgba(245, 247, 250, 0.72)',
-    fontSize: 16,
-    lineHeight: 22,
+    fontSize: 14,
+    lineHeight: 18,
     textAlign: 'center',
-    marginTop: -4,
+    marginTop: -6,
   },
   pagination: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    marginTop: 16,
-    marginBottom: 24,
+    marginTop: 8,
+    marginBottom: 12,
   },
   paginationDot: {
     width: 14,
@@ -777,11 +856,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 14,
+    marginBottom: 10,
   },
   configurationTitle: {
     color: '#F5F7FA',
-    fontSize: 25,
+    fontSize: 22,
     fontWeight: '700',
     flexShrink: 1,
   },
@@ -793,9 +872,9 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.08)',
   },
   row: {
-    minHeight: 86,
+    minHeight: 58,
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -807,7 +886,7 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     color: '#F5F7FA',
-    fontSize: 22,
+    fontSize: 17,
     fontWeight: '500',
   },
   rowTrailing: {
@@ -818,7 +897,7 @@ const styles = StyleSheet.create({
   },
   rowValue: {
     color: 'rgba(245, 247, 250, 0.72)',
-    fontSize: 21,
+    fontSize: 16,
     fontWeight: '500',
   },
   primaryButton: {
@@ -948,40 +1027,39 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     marginTop: 18,
   },
-  themeGrid: {
-    paddingTop: 8,
-    paddingBottom: 28,
+  themeListCard: {
+    borderRadius: 28,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    marginTop: 8,
+  },
+  themeRow: {
+    minHeight: 82,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 16,
   },
-  themeCard: {
-    height: 168,
-    borderRadius: 28,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: 'transparent',
-    backgroundColor: 'rgba(255,255,255,0.06)',
+  themeRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    flex: 1,
   },
-  themeCardSelected: {
-    borderColor: '#8B7CFF',
-  },
-  themeCardImage: {
-    width: '100%',
-    height: '100%',
-  },
-  themeLabelWrap: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
+  themeThumbnail: {
+    width: 56,
+    height: 56,
     borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(11, 15, 26, 0.52)',
   },
-  themeLabel: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '700',
+  themeRowLabel: {
+    color: '#F5F7FA',
+    fontSize: 19,
+    fontWeight: '600',
+    flex: 1,
   },
   buttonPressed: {
     opacity: 0.92,
@@ -991,5 +1069,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  saveButton: {
+    height: 44,
+    borderRadius: 39,
+    backgroundColor: '#F5F7FA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 14,
+  },
+  saveButtonText: {
+    color: '#0B0F1A',
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 1,
   },
 });
