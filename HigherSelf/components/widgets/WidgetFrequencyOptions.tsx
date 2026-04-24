@@ -36,12 +36,14 @@ function FrequencyOption({
         pressed && styles.buttonPressed,
       ]}
     >
-      <View style={styles.optionTextWrap}>
-        <Text style={styles.optionTitle}>{label}</Text>
-        <Text style={styles.optionDescription}>{description}</Text>
-      </View>
-      <View style={[styles.radioOuter, selected && styles.radioOuterSelected]}>
-        {selected ? <View style={styles.radioInner} /> : null}
+      <View style={styles.optionContent}>
+        <View style={styles.optionTopRow}>
+          <Text style={styles.optionTitle}>{label}</Text>
+          <View style={[styles.radioOuter, selected && styles.radioOuterSelected]} />
+        </View>
+        <View style={styles.optionBottomRow}>
+          <Text style={styles.optionDescription}>{description}</Text>
+        </View>
       </View>
     </Pressable>
   );
@@ -86,65 +88,75 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   intro: {
-    color: '#F5F7FA',
-    fontSize: 16,
-    lineHeight: 22,
+    color: 'rgba(245, 247, 250, 0.86)',
+    fontSize: 17,
+    lineHeight: 26,
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 12,
     paddingHorizontal: 4,
   },
   optionList: {
-    gap: 18,
-    marginTop: 6,
+    gap: 50,
+    marginTop: 75,
   },
   optionCard: {
+    minHeight: 118,
     borderRadius: 26,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(255,255,255,0.07)',
     borderWidth: 1,
-    borderColor: 'rgba(139, 124, 255, 0.18)',
-    paddingHorizontal: 22,
-    paddingVertical: 20,
+    borderColor: 'rgba(255,255,255,0.14)',
+    paddingHorizontal: 18,
+    paddingVertical: 22,
+  },
+  optionContent: {
+    gap: 14,
+  },
+  optionTopRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 16,
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  optionBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
   },
   optionCardSelected: {
-    backgroundColor: 'rgba(139, 124, 255, 0.18)',
-  },
-  optionTextWrap: {
-    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(245, 247, 250, 0.28)',
   },
   optionTitle: {
+    flex: 1,
     color: '#F5F7FA',
-    fontSize: 24,
+    fontSize: 23,
     fontWeight: '700',
   },
   optionDescription: {
+    flex: 1,
     color: 'rgba(245, 247, 250, 0.72)',
-    fontSize: 18,
-    marginTop: 8,
+    fontSize: 16,
+    fontWeight: '600',
   },
   radioOuter: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    borderWidth: 3,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
     borderColor: 'rgba(245, 247, 250, 0.8)',
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   radioOuterSelected: {
-    borderColor: '#F2C94C',
-  },
-  radioInner: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#F2C94C',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 5,
+    borderColor: '#F5F7FA',
   },
   buttonPressed: {
     opacity: 0.92,
-    transform: [{ scale: 0.99 }],
   },
 });

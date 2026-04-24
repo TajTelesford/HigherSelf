@@ -75,7 +75,7 @@ export default function WidgetsScreen() {
   } else if (detailScreen === 'theme') {
     title = 'Theme';
   } else if (detailScreen === 'refresh') {
-    title = 'Refresh';
+    title = 'Refresh frequency';
   }
 
   const content =
