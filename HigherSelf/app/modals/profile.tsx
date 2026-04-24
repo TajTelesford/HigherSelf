@@ -18,7 +18,7 @@ const PROFILE_CARDS: ProfileCard[] = [
   {
     title: 'App icon',
     icon: 'shape-outline',
-    onPress: () => Alert.alert('App Icon', 'App icon options are coming next.'),
+    onPress: () => router.push('/modals/app-icon'),
   },
   {
     title: 'Reminders',
