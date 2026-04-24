@@ -2,6 +2,12 @@ import { MoodCalendar } from '@/components/MoodCalendar';
 import { MoodPicker, type MoodOption } from '@/components/MoodPicker';
 import { TodaysMood } from '@/components/TodaysMood';
 import { STORAGE_KEYS } from '@/data/HigherSelf_StorageKeys';
+import {
+  MOOD_PICKER_START_HOUR,
+  canSelectMoodForCurrentDate,
+  getLocalDateKey,
+  pruneFutureMoodEntries,
+} from '@/lib/mood-date';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
@@ -25,8 +31,6 @@ const MOOD_OPTIONS: MoodOption[] = [
   { id: 'stressed', label: 'Stressed', icon: 'thunderstorm-outline', accent: '#F87171' },
 ];
 
-const getTodayKey = () => new Date().toISOString().slice(0, 10);
-
 export default function MoodScreen() {
   const [selectedMoodId, setSelectedMoodId] = useState<string | null>(null);
   const [moodsByDate, setMoodsByDate] = useState<Record<string, string>>({});
@@ -36,6 +40,7 @@ export default function MoodScreen() {
   useEffect(() => {
     const loadTodayMood = async () => {
       try {
+        const todayKey = getLocalDateKey();
         const storedMoods = await AsyncStorage.getItem(
           STORAGE_KEYS.DAILY_MOOD_SELECTIONS
         );
@@ -45,11 +50,19 @@ export default function MoodScreen() {
         }
 
         const parsedMoods = JSON.parse(storedMoods) as Record<string, string>;
-        setMoodsByDate(parsedMoods);
-        const todayMood = parsedMoods[getTodayKey()];
+        const sanitizedMoods = pruneFutureMoodEntries(parsedMoods, todayKey);
+        setMoodsByDate(sanitizedMoods);
+        const todayMood = sanitizedMoods[todayKey];
 
         if (todayMood) {
           setSelectedMoodId(todayMood);
+        }
+
+        if (JSON.stringify(sanitizedMoods) !== JSON.stringify(parsedMoods)) {
+          await AsyncStorage.setItem(
+            STORAGE_KEYS.DAILY_MOOD_SELECTIONS,
+            JSON.stringify(sanitizedMoods)
+          );
         }
       } catch (error) {
         console.error('Failed to load today mood:', error);
@@ -66,22 +79,28 @@ export default function MoodScreen() {
       return;
     }
 
+    if (!canSelectMoodForCurrentDate()) {
+      return;
+    }
+
     try {
+      const todayKey = getLocalDateKey();
       const storedMoods = await AsyncStorage.getItem(
         STORAGE_KEYS.DAILY_MOOD_SELECTIONS
       );
       const parsedMoods = storedMoods
         ? (JSON.parse(storedMoods) as Record<string, string>)
         : {};
+      const sanitizedMoods = pruneFutureMoodEntries(parsedMoods, todayKey);
 
-      parsedMoods[getTodayKey()] = moodId;
+      sanitizedMoods[todayKey] = moodId;
 
       await AsyncStorage.setItem(
         STORAGE_KEYS.DAILY_MOOD_SELECTIONS,
-        JSON.stringify(parsedMoods)
+        JSON.stringify(sanitizedMoods)
       );
 
-      setMoodsByDate(parsedMoods);
+      setMoodsByDate(sanitizedMoods);
       setSelectedMoodId(moodId);
       setIsEditingMood(false);
     } catch (error) {
@@ -91,7 +110,8 @@ export default function MoodScreen() {
 
   const selectedMood = MOOD_OPTIONS.find((mood) => mood.id === selectedMoodId);
   const isLocked = Boolean(selectedMoodId);
-  const shouldShowPicker = !isLocked || isEditingMood;
+  const canPickMoodToday = canSelectMoodForCurrentDate();
+  const shouldShowPicker = canPickMoodToday && (!isLocked || isEditingMood);
 
   return (
     <View style={styles.backdrop}>
@@ -131,10 +151,20 @@ export default function MoodScreen() {
               contentContainerStyle={styles.historyContent}
               showsVerticalScrollIndicator={false}
             >
-              <TodaysMood
-                mood={selectedMood}
-                onConfirmUpdate={() => setIsEditingMood(true)}
-              />
+              {selectedMood ? (
+                <TodaysMood
+                  mood={selectedMood}
+                  onConfirmUpdate={() => setIsEditingMood(true)}
+                />
+              ) : !canPickMoodToday ? (
+                <View style={styles.noticeCard}>
+                  <Text style={styles.noticeTitle}>Mood check-in opens at 6:00 AM</Text>
+                  <Text style={styles.noticeText}>
+                    You can log your mood after {MOOD_PICKER_START_HOUR}:00 AM on your
+                    current local date.
+                  </Text>
+                </View>
+              ) : null}
               <MoodCalendar moodOptions={MOOD_OPTIONS} moodsByDate={moodsByDate} />
             </ScrollView>
           )}
@@ -217,5 +247,24 @@ const styles = StyleSheet.create({
   historyContent: {
     paddingBottom: 24,
     gap: 18,
+  },
+  noticeCard: {
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  noticeTitle: {
+    color: '#F5F7FA',
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  noticeText: {
+    color: '#D9E1EC',
+    fontSize: 15,
+    lineHeight: 22,
   },
 });
