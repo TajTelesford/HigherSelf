@@ -28,7 +28,7 @@ const PROFILE_CARDS: ProfileCard[] = [
   {
     title: 'Widgets',
     icon: 'tablet-dashboard',
-    onPress: () => Alert.alert('Widgets', 'Widget setup is coming next.'),
+    onPress: () => router.push('/modals/widgets'),
   },
 ];
 
