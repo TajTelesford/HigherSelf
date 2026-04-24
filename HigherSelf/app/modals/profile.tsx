@@ -23,7 +23,7 @@ const PROFILE_CARDS: ProfileCard[] = [
   {
     title: 'Reminders',
     icon: 'bell-ring-outline',
-    onPress: () => Alert.alert('Reminders', 'Reminder settings are coming next.'),
+    onPress: () => router.push('/modals/reminders'),
   },
   {
     title: 'Widgets',

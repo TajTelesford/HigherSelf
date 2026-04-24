@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   DAILY_MOOD_SELECTIONS: 'daily_mood_selections',
   PRACTICE_AFFIRMATION_QUEUE: 'practice_affirmation_queue',
   PRACTICE_AFFIRMATION_PROMPT_DATE: 'practice_affirmation_prompt_date',
+  REMINDERS: 'reminders',
   VOICE_RECORDINGS: 'voice_recordings',
   USER_STREAK: 'user_streak',
 };
