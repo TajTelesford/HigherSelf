@@ -1,5 +1,4 @@
 import type { WidgetConfiguration } from '@/context/WidgetsContext';
-import { getWidgetTopicLabel } from '@/data/widgetTopics';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -8,10 +7,9 @@ import { WidgetSettingsTile } from './WidgetSettingsTile';
 type WidgetDetailScreen = 'refresh' | 'theme' | 'topics';
 
 export function WidgetSettingsCard({
-  activeThemeName,
-  activeWidget,
+  activeWidget: _activeWidget,
   onOpenDetailScreen,
-  onUpdateWidget,
+  onUpdateWidget: _onUpdateWidget,
 }: {
   activeThemeName: string;
   activeWidget: WidgetConfiguration;
@@ -25,33 +23,28 @@ export function WidgetSettingsCard({
     <View style={styles.card}>
       <WidgetSettingsTile
         label="Customize"
-        onSwitchChange={(value) => onUpdateWidget(activeWidget.id, { enabled: value })}
-        switchValue={activeWidget.enabled}
-        withSwitch
+        onPress={() => null}
+        showDivider={true}
       />
       <WidgetSettingsTile
         label="Topics"
         onPress={() => onOpenDetailScreen('topics')}
-        value={getWidgetTopicLabel(activeWidget.topicIds)}
-        withChevron
+        showDivider={true}
       />
       <WidgetSettingsTile
         label="Theme"
         onPress={() => onOpenDetailScreen('theme')}
-        value={activeThemeName}
-        withChevron
+        showDivider={true}
       />
       <WidgetSettingsTile
         label="Widget border"
-        onSwitchChange={(value) => onUpdateWidget(activeWidget.id, { showBorder: value })}
-        switchValue={activeWidget.showBorder}
-        withSwitch
+        onPress={() => null}
+        showDivider={true}
       />
       <WidgetSettingsTile
         label="Refresh"
         onPress={() => onOpenDetailScreen('refresh')}
-        showDivider={false}
-        withChevron
+        showDivider={true}
       />
     </View>
   );
@@ -59,6 +52,7 @@ export function WidgetSettingsCard({
 
 const styles = StyleSheet.create({
   card: {
+    height: 280,
     borderRadius: 24,
     backgroundColor: '#141A26',
     borderWidth: 1,

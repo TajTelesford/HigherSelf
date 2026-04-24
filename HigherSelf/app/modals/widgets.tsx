@@ -1,19 +1,15 @@
-import { useCustomAffirmations } from '@/context/CustomAffirmationsContext';
-import { WidgetFrequencyOptions } from '@/components/widgets/WidgetFrequencyOptions';
 import { WidgetHomeContent } from '@/components/widgets/WidgetHomeContent';
 import { WidgetIconCircleButton } from '@/components/widgets/WidgetIconCircleButton';
-import { WidgetThemePanel } from '@/components/widgets/WidgetThemePanel';
-import { WidgetTopicsPanel } from '@/components/widgets/WidgetTopicsPanel';
+import { useCustomAffirmations } from '@/context/CustomAffirmationsContext';
 import { useWidgets } from '@/context/WidgetsContext';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Pressable,
   StyleSheet,
   Text,
-  View,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -70,43 +66,9 @@ export default function WidgetsScreen() {
   };
 
   let title = 'Widgets';
-  let content = (
-    <WidgetHomeContent
-      activeWidget={activeWidget}
-      customAffirmations={customAffirmations}
-      onDeleteWidget={handleDeleteWidget}
-      onOpenDetailScreen={setDetailScreen}
-      onSelectWidget={selectWidgetConfiguration}
-      onUpdateWidget={updateWidgetConfiguration}
-      widgetConfigurations={widgetConfigurations}
-    />
-  );
+ 
 
-  if (detailScreen === 'refresh') {
-    title = 'Refresh frequency';
-    content = (
-      <WidgetFrequencyOptions
-        activeWidget={activeWidget}
-        onUpdateWidget={updateWidgetConfiguration}
-      />
-    );
-  } else if (detailScreen === 'topics') {
-    title = 'Topics you follow';
-    content = (
-      <WidgetTopicsPanel
-        activeWidget={activeWidget}
-        onUpdateWidget={updateWidgetConfiguration}
-      />
-    );
-  } else if (detailScreen === 'theme') {
-    title = 'Choose theme';
-    content = (
-      <WidgetThemePanel
-        activeWidget={activeWidget}
-        onUpdateWidget={updateWidgetConfiguration}
-      />
-    );
-  }
+ 
 
   return (
     <View style={styles.backdrop}>
@@ -128,13 +90,15 @@ export default function WidgetsScreen() {
             />
           </View>
 
-          {!isLoaded || loading || !activeWidget ? (
-            <View style={styles.loaderWrap}>
-              <ActivityIndicator color="#F6EAE4" size="small" />
-            </View>
-          ) : (
-            content
-          )}
+            <WidgetHomeContent
+              activeWidget={activeWidget}
+              customAffirmations={customAffirmations}
+              onDeleteWidget={handleDeleteWidget}
+              onOpenDetailScreen={setDetailScreen}
+              onSelectWidget={selectWidgetConfiguration}
+              onUpdateWidget={updateWidgetConfiguration}
+              widgetConfigurations={widgetConfigurations}
+            />
         </View>
       </SafeAreaView>
     </View>

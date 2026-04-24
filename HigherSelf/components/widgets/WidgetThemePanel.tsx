@@ -1,9 +1,9 @@
 import type { WidgetConfiguration } from '@/context/WidgetsContext';
-import { THEMES } from '@/data/themes';
 import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View, ScrollView } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { THEMES } from '../../data/themes';
 
 export function WidgetThemePanel({
   activeWidget,
