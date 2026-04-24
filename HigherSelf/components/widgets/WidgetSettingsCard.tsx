@@ -7,9 +7,10 @@ import { WidgetSettingsTile } from './WidgetSettingsTile';
 type WidgetDetailScreen = 'refresh' | 'theme' | 'topics';
 
 export function WidgetSettingsCard({
-  activeWidget: _activeWidget,
+  activeThemeName: _activeThemeName,
+  activeWidget,
   onOpenDetailScreen,
-  onUpdateWidget: _onUpdateWidget,
+  onUpdateWidget,
 }: {
   activeThemeName: string;
   activeWidget: WidgetConfiguration;
@@ -24,27 +25,36 @@ export function WidgetSettingsCard({
       <WidgetSettingsTile
         label="Customize"
         onPress={() => null}
+        onSwitchChange={(value) => onUpdateWidget(activeWidget.id, { enabled: value })}
         showDivider={true}
+        switchValue={activeWidget.enabled}
+        withSwitch
       />
       <WidgetSettingsTile
         label="Topics"
         onPress={() => onOpenDetailScreen('topics')}
         showDivider={true}
+        withChevron
       />
       <WidgetSettingsTile
         label="Theme"
         onPress={() => onOpenDetailScreen('theme')}
         showDivider={true}
+        withChevron
       />
       <WidgetSettingsTile
         label="Widget border"
         onPress={() => null}
+        onSwitchChange={(value) => onUpdateWidget(activeWidget.id, { showBorder: value })}
         showDivider={true}
+        switchValue={activeWidget.showBorder}
+        withSwitch
       />
       <WidgetSettingsTile
         label="Refresh"
         onPress={() => onOpenDetailScreen('refresh')}
         showDivider={true}
+        withChevron
       />
     </View>
   );
