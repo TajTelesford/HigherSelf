@@ -10,9 +10,15 @@ export type AppIconOption = {
 export const APP_ICON_OPTIONS: AppIconOption[] = [
   {
     id: 'HigherSelfGlow',
-    label: 'HigherSelf',
+    label: 'Original',
     preview: require('../assets/Logos/Glow.png'),
     assetPath: './assets/Logos/Glow.png',
+  },
+  {
+    id: 'HigherSelfGlowBlack',
+    label: 'Dark',
+    preview: require('../assets/Logos/Glow_Black.png'),
+    assetPath: './assets/Logos/Glow_Black.png',
   },
 ];
 
