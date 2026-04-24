@@ -3,7 +3,7 @@ import type { AffirmationCategory } from '@/types/affirmations';
 import { Text } from '@/components/ui/text';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import type { ComponentProps } from 'react';
-import { Alert, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import HeartButton from './HeartButton';
 
 type AffirmationsCardProps = {
@@ -11,6 +11,7 @@ type AffirmationsCardProps = {
   affirmation: string;
   style?: StyleProp<ViewStyle>;
   category: AffirmationCategory | string;
+  onSharePress?: () => void | Promise<void>;
 };
 
 type ActionButtonProps = {
@@ -38,6 +39,7 @@ export function AffirmationsCard({
   affirmation,
   style,
   category,
+  onSharePress,
 }: AffirmationsCardProps) {
   const { isSaved, toggleSaved } = useSavedAffirmations();
   const saved = isSaved(id);
@@ -49,7 +51,11 @@ export function AffirmationsCard({
       </View>
 
       <View style={styles.actions}>
-        <ActionButton accessibilityLabel="Dislike affirmation" icon="ios-share" onPress={() => Alert.alert('Skipped', 'We can show another affirmation next.')} />
+        <ActionButton
+          accessibilityLabel="Share affirmation"
+          icon="share"
+          onPress={onSharePress}
+        />
 
         <HeartButton
           saved={saved}

@@ -4,6 +4,7 @@ import { SavedAffirmationCard } from '@/components/SavedAffirmationCard';
 import { Text } from '@/components/ui/text';
 import { useAffirmationCollections } from '@/context/AffirmationCollectionsContext';
 import { useSavedAffirmations } from '@/context/SavedAffirmationContext';
+import { useAffirmationShare } from '@/hooks/use-affirmation-share';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
@@ -12,6 +13,7 @@ import type { Affirmation } from '@/types/affirmations';
 
 export default function FavoritesScreen() {
   const { savedAffirmations, loading } = useSavedAffirmations();
+  const { shareAffirmation, shareCardPortal } = useAffirmationShare();
   const { collections, isAffirmationInCollection, toggleAffirmationInCollection } =
     useAffirmationCollections();
   const [selectedAffirmation, setSelectedAffirmation] = useState<Affirmation | null>(
@@ -54,6 +56,12 @@ export default function FavoritesScreen() {
             affirmation={item}
             bookmarked={bookmarkedAffirmationIds.has(item.id)}
             onBookmarkPress={() => setSelectedAffirmation(item)}
+            onSharePress={() =>
+              shareAffirmation({
+                affirmation: item.text,
+                category: item.category,
+              })
+            }
           />
         )}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -91,6 +99,7 @@ export default function FavoritesScreen() {
           toggleAffirmationInCollection(collectionId, affirmation)
         }
       />
+      {shareCardPortal}
     </View>
   );
 }
