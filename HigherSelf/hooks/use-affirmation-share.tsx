@@ -58,7 +58,7 @@ export function useAffirmationShare() {
 
         const imageUri = await captureRef(shareCardRef, {
           format: 'png',
-          quality: 1,
+          quality: 0.8,
           result: 'tmpfile',
         });
 
@@ -138,8 +138,9 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
   captureCard: {
-    width: 1080,
-    height: 1920,
+    width: 480,
+    height: 854,
+    backgroundColor: 'transparent',
   },
 });
 
