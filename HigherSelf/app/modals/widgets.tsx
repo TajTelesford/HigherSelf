@@ -4,11 +4,10 @@ import {
   type WidgetConfiguration,
   type WidgetRefreshFrequency,
 } from '@/context/WidgetsContext';
-import { THEMES, type ThemeItem } from '@/data/themes';
 import {
-  WIDGET_TOPICS,
   getAffirmationsForWidgetTopics,
   getWidgetTopicLabel,
+  WIDGET_TOPICS,
 } from '@/data/widgetTopics';
 import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
@@ -27,6 +26,7 @@ import {
   type ListRenderItemInfo,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { THEMES, type ThemeItem } from '../../data/themes';
 
 type WidgetDetailScreen = 'home' | 'refresh' | 'theme' | 'topics';
 type WidgetPreviewKind = 'large' | 'medium' | 'small';
@@ -229,6 +229,7 @@ function FrequencyOption({
 
 export default function WidgetsScreen() {
   const { width } = useWindowDimensions();
+  const previewViewportWidth = width - 40;
   const previewListRef = useRef<FlatList<WidgetPreviewKind> | null>(null);
   const { customAffirmations, loading } = useCustomAffirmations();
   const {
@@ -275,19 +276,31 @@ export default function WidgetsScreen() {
         <FlatList
           ref={previewListRef}
           data={PREVIEW_KINDS}
+          decelerationRate="fast"
+          disableIntervalMomentum
+          getItemLayout={(_, index) => ({
+            index,
+            length: previewViewportWidth,
+            offset: previewViewportWidth * index,
+          })}
           horizontal
           pagingEnabled
+          contentContainerStyle={styles.previewListContent}
           showsHorizontalScrollIndicator={false}
+          snapToAlignment="start"
+          style={styles.previewList}
           keyExtractor={(item) => item}
           onMomentumScrollEnd={(event) => {
-            const nextIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+            const nextIndex = Math.round(
+              event.nativeEvent.contentOffset.x / previewViewportWidth
+            );
             setPreviewIndex(nextIndex);
           }}
           renderItem={({ item }: ListRenderItemInfo<WidgetPreviewKind>) => (
             <DevicePreviewCard
               affirmation={previewAffirmation}
               kind={item}
-              pageWidth={width - 48}
+              pageWidth={previewViewportWidth}
               showBorder={activeWidget.showBorder}
               theme={activeTheme}
             />
@@ -513,13 +526,6 @@ export default function WidgetsScreen() {
       <Pressable onPress={() => router.back()} style={styles.dismissArea} />
 
       <SafeAreaView edges={['bottom']} style={styles.sheet}>
-        <ExpoImage
-          contentFit="cover"
-          source={activeTheme.image}
-          style={styles.backgroundImage}
-          transition={0}
-        />
-        <View style={styles.backgroundOverlay} />
         <View style={styles.handle} />
 
         <View style={styles.panel}>
@@ -571,13 +577,6 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
     overflow: 'hidden',
   },
-  backgroundImage: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  backgroundOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(8, 12, 20, 0.72)',
-  },
   handle: {
     alignSelf: 'center',
     width: 54,
@@ -628,8 +627,14 @@ const styles = StyleSheet.create({
   },
   previewShell: {
     height: 540,
-    marginHorizontal: -20,
     marginTop: 6,
+    overflow: 'hidden',
+  },
+  previewList: {
+    flex: 1,
+  },
+  previewListContent: {
+    alignItems: 'center',
   },
   previewPage: {
     alignItems: 'center',
