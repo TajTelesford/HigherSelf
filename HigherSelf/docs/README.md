@@ -19,6 +19,7 @@ HigherSelf is an Expo + React Native affirmation app built with Expo Router. The
 - [Codebase Overview](./CODEBASE_OVERVIEW.md): High-level explanation of the app structure, routing, state, and feature areas.
 - [Architecture](./ARCHITECTURE.md): Technical view of how navigation, providers, storage, and shared UI patterns fit together.
 - [Feature Guide](./FEATURE_GUIDE.md): Screen-by-screen and workflow-oriented documentation.
+- [Affirmation Sharing](./SHARING_FEATURE.md): Detailed documentation for the themed affirmation sharing flow.
 - [State And Storage](./STATE_AND_STORAGE.md): Context providers, AsyncStorage keys, and persisted data shapes.
 
 ## Quick Orientation
@@ -28,7 +29,8 @@ If you are new to the repo, read these in order:
 1. `docs/CODEBASE_OVERVIEW.md`
 2. `docs/ARCHITECTURE.md`
 3. `docs/FEATURE_GUIDE.md`
-4. `docs/STATE_AND_STORAGE.md`
+4. `docs/SHARING_FEATURE.md`
+5. `docs/STATE_AND_STORAGE.md`
 
 ## Main Source Areas
 

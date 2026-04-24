@@ -56,6 +56,7 @@ Main behaviors:
 - create a new affirmation in a modal composer
 - search and sort created affirmations
 - add custom affirmations to collections
+- share custom affirmations with the same themed share flow used elsewhere
 - reuse the same card presentation pattern as saved affirmations
 
 Important note:
@@ -117,8 +118,26 @@ Main behaviors:
 
 - shows a grid of image themes
 - updates `selectedThemeId` in `ThemeContextProvider`
+- persists the selected theme for later app launches
 - changes the visual background on the home screen
 - affects the background used in the share card flow
+
+## Affirmation Sharing
+
+Main files:
+
+- `hooks/use-affirmation-share.tsx`
+- `components/AffirmationShareCard.tsx`
+
+The share feature creates a theme-aware image for an affirmation and sends it through the native share sheet.
+
+Main behaviors:
+
+- uses the user’s currently selected theme as the share card background
+- loads the theme asset before capture to avoid first-share race conditions
+- captures an off-screen rendered card
+- opens the native share sheet with the generated image
+- is reused across home, favorites, collections, and custom affirmations
 
 ## Streak
 

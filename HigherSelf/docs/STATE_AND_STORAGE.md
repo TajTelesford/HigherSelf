@@ -45,6 +45,7 @@ Defined in `data/HigherSelf_StorageKeys.ts`.
 - `saved_affirmations`
 - `affirmation_collections`
 - `custom_affirmations`
+- `selected_theme`
 - `daily_mood_selections`
 - `practice_affirmation_queue`
 - `practice_affirmation_prompt_date`
@@ -113,10 +114,7 @@ Responsibilities:
 - track the selected theme id
 - expose the currently selected theme object
 - preload theme images for smoother rendering
-
-Note:
-
-The selected theme is currently app-session state and is not persisted to AsyncStorage in this provider.
+- persist the selected theme id to AsyncStorage
 
 ## Local File Storage
 
@@ -150,5 +148,6 @@ This split is important because binary audio files should not be stored directly
 
 1. Screen calls `shareAffirmation` from `use-affirmation-share.tsx`.
 2. The hook renders `AffirmationShareCard` off-screen.
-3. The card uses the currently selected theme.
-4. The card is captured as an image and handed to the native share sheet.
+3. The hook ensures the selected theme asset is loaded.
+4. The card uses the currently selected theme.
+5. The card is captured as an image and handed to the native share sheet.

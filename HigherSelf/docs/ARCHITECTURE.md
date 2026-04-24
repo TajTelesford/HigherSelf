@@ -77,6 +77,8 @@ The themed sharing feature is built in layers:
 
 The selected theme comes from `ThemeContextProvider`, so the shared image matches the user’s current home-screen theme.
 
+The current implementation also explicitly loads the selected theme asset before capture and uses smaller optimized theme files to make the first share attempt more reliable.
+
 ## Audio Recording Architecture
 
 The recording flow in `app/modals/recordAffirmations.tsx` is one of the more complex parts of the app.
@@ -115,6 +117,8 @@ There are two separate theme ideas in the app:
 2. the user-selectable affirmation background theme used on the home screen and share cards
 
 The second one is the more user-facing feature theme, defined in `data/themes.ts` and managed by `ThemeContextProvider`.
+
+That same theme value is reused by the affirmation sharing feature, which keeps the shared image visually consistent with the home screen.
 
 ## Technical Constraints To Keep In Mind
 
