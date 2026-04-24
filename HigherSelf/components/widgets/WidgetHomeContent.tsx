@@ -4,7 +4,7 @@ import type { AffirmationCollection } from '@/types/collections';
 import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FlatList,
   Pressable,
@@ -20,6 +20,7 @@ import {
   getThemeById,
   type WidgetPreviewKind,
 } from './widgetPreviewUtils';
+import { WidgetNameAlert } from './WidgetNameAlert';
 import { WidgetSettingsCard } from './WidgetSettingsCard';
 
 type WidgetDetailScreen = 'refresh' | 'theme' | 'topics';
@@ -144,6 +145,7 @@ export function WidgetHomeContent({
   const { width } = useWindowDimensions();
   const previewViewportWidth = width - 40;
   const previewListRef = useRef<FlatList<WidgetConfiguration> | null>(null);
+  const [showRenameAlert, setShowRenameAlert] = useState(false);
   const activeWidgetIndex = Math.max(
     0,
     widgetConfigurations.findIndex((configuration) => configuration.id === activeWidget.id)
@@ -222,10 +224,13 @@ export function WidgetHomeContent({
         ))}
       </View>
 
-      <View style={styles.configurationTitleRow}>
+      <Pressable
+        onPress={() => setShowRenameAlert(true)}
+        style={styles.configurationTitleRow}
+      >
         <Ionicons color="#F6EAE4" name="create-outline" size={28} />
         <Text style={styles.configurationTitle}>{activeWidget.name}</Text>
-      </View>
+      </Pressable>
 
       <WidgetSettingsCard
         activeThemeName={activeTheme.name}
@@ -239,6 +244,16 @@ export function WidgetHomeContent({
           <Text style={styles.saveButtonText}>Delete Widget</Text>
         </Pressable>
       ) : null}
+
+      <WidgetNameAlert
+        initialName={activeWidget.name}
+        onClose={() => setShowRenameAlert(false)}
+        onSave={(name) => {
+          onUpdateWidget(activeWidget.id, { name });
+          setShowRenameAlert(false);
+        }}
+        visible={showRenameAlert}
+      />
     </View>
   );
 }
@@ -389,6 +404,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     marginBottom: 10,
+    alignSelf: 'flex-start',
   },
   configurationTitle: {
     color: '#F5F7FA',
