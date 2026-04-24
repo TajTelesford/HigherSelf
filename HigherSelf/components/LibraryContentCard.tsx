@@ -4,11 +4,11 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 type LibraryContentCardProps = {
-  text?: string;
+  content?: string;
 };
 
 export function LibraryContentCard({
-  text = 'Open your favorites, collections, custom affirmations, and recordings.',
+  content = 'Open your favorites, collections, custom affirmations, and recordings.',
 }: LibraryContentCardProps) {
   const handlePress = () => {
     router.dismissAll();
@@ -20,7 +20,7 @@ export function LibraryContentCard({
       <View style={styles.contentRow}>
         <View style={styles.textWrap}>
           <Text style={styles.title}>Library</Text>
-          <Text style={styles.body}>{text}</Text>
+          <Text style={styles.body}>{content}</Text>
         </View>
 
         <View style={styles.artWrap}>
@@ -28,18 +28,6 @@ export function LibraryContentCard({
             name="library-outline"
             size={52}
             color="rgba(244, 201, 93, 0.86)"
-          />
-          <Ionicons
-            name="sparkles"
-            size={14}
-            color="rgba(255, 248, 220, 0.8)"
-            style={styles.sparkleTop}
-          />
-          <Ionicons
-            name="sparkles"
-            size={10}
-            color="rgba(255, 248, 220, 0.68)"
-            style={styles.sparkleBottom}
           />
         </View>
       </View>
@@ -49,7 +37,8 @@ export function LibraryContentCard({
 
 const styles = StyleSheet.create({
   card: {
-    minHeight: 132,
+    width: '100%',
+    height: 132,
     borderRadius: 26,
     backgroundColor: 'rgba(78, 58, 24, 0.96)',
     marginTop: 24,
@@ -88,16 +77,5 @@ const styles = StyleSheet.create({
     height: 84,
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
-  },
-  sparkleTop: {
-    position: 'absolute',
-    top: 10,
-    right: 6,
-  },
-  sparkleBottom: {
-    position: 'absolute',
-    bottom: 10,
-    left: 8,
   },
 });

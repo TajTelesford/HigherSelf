@@ -144,9 +144,6 @@ export default function CollectionDetailScreen() {
               onPress={handleDeleteCollection}
               style={styles.deleteButton}
             >
-              <View pointerEvents="none" style={styles.deleteGradientBase} />
-              <View pointerEvents="none" style={styles.deleteGradientPurple} />
-              <View pointerEvents="none" style={styles.deleteGradientGold} />
               <Ionicons color="#F5F7FA" name="trash-outline" size={20} />
             </Pressable>
           ) : null}
@@ -227,32 +224,9 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
     backgroundColor: '#11182A',
     borderWidth: 1,
     borderColor: 'rgba(139, 124, 255, 0.28)',
-  },
-  deleteGradientBase: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#11182A',
-  },
-  deleteGradientPurple: {
-    position: 'absolute',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'rgba(139, 124, 255, 0.48)',
-    top: -5,
-    left: -3,
-  },
-  deleteGradientGold: {
-    position: 'absolute',
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: 'rgba(242, 201, 76, 0.7)',
-    right: -2,
-    bottom: -1,
   },
   title: {
     color: '#F5F7FA',

@@ -1,5 +1,5 @@
-import { colors } from '@/assets/theme/colors';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -12,86 +12,75 @@ type ProfileCard = {
 
 export const ProfileCardTile = ({ title, icon, onPress }: ProfileCard) => {
   return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.tile, styles.tilePressed]}
-    >
-      <View style={styles.tileArt}>
-        <View style={styles.iconBadge}>
-          <MaterialCommunityIcons color={colors.accent.gold} name={icon} size={64} />
+    <Pressable onPress={onPress} style={styles.card}>
+      <LinearGradient
+        colors={['#090D16', '#12192A', '#1A1430']}
+        end={{ x: 0.88, y: 1 }}
+        start={{ x: 0.12, y: 0 }}
+        style={styles.gradient}
+      >
+        <View style={styles.iconWrap}>
+          <LinearGradient
+            colors={['rgba(146, 94, 255, 0.42)', 'rgba(39, 24, 78, 0.18)']}
+            end={{ x: 0.9, y: 0.95 }}
+            start={{ x: 0.1, y: 0.05 }}
+            style={styles.iconGradient}
+          >
+            <MaterialCommunityIcons
+              color="#F4C95D"
+              name={icon}
+              size={42}
+            />
+          </LinearGradient>
         </View>
-        <Ionicons
-          name="sparkles"
-          size={14}
-          color="rgba(242, 201, 76, 0.9)"
-          style={styles.tileSparkleOne}
-        />
-        <Ionicons
-          name="sparkles"
-          size={14}
-          color="rgba(139, 124, 255, 0.9)"
-          style={styles.tileSparkleTwo}
-        />
-      </View>
 
-      <Text style={styles.tileTitle}>{title}</Text>
+        <Text style={styles.title}>{title}</Text>
+      </LinearGradient>
     </Pressable>
   );
 };
 
-
 const styles = StyleSheet.create({
-  tile: {
-    width: '50%',
-    minHeight: 100,
-    borderRadius: 28,
-    backgroundColor: 'rgba(242, 201, 76, 0.08)',
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+  card: {
+    width: '48%',
+    aspectRatio: 1,
+    borderRadius: 26,
     borderWidth: 1,
-    borderColor: 'rgba(242, 201, 76, 0.22)',
+    borderColor: 'rgba(154, 112, 255, 0.38)',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.24,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 9,
+  },
+  gradient: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    justifyContent: 'space-between',
+    borderRadius: 26,
+  },
+  iconWrap: {
+    width: 62,
+    height: 62,
+    borderRadius: 20,
     overflow: 'hidden',
   },
-  tilePressed: {
-    opacity: 0.82,
-    transform: [{ scale: 0.98 }],
-  },
-  tileArt: {
+  iconGradient: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-  iconBadge: {
-    width: '100%',
-    height: 178,
-    borderRadius: 30,
-    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: 'rgba(164, 124, 255, 0.3)',
   },
-  tileSparkleOne: {
-    position: 'absolute',
-    top: 8,
-    left: 20,
-  },
-  tileSparkleTwo: {
-    position: 'absolute',
-    top: 18,
-    right: 24,
-  },
-  tileTitle: {
-    color: colors.text.primary,
+  title: {
+    color: '#FFFFFF',
     fontSize: 21,
-    fontWeight: '300',
-    lineHeight: 27,
-    position: 'absolute',
-    left: 22,
-    right: 22,
-    bottom: 22,
+    fontWeight: '700',
+    lineHeight: 26,
+    textShadowColor: 'rgba(0, 0, 0, 0.24)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 10,
   },
 });

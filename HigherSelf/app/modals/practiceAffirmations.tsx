@@ -141,7 +141,6 @@ export default function PracticeAffirmationsScreen() {
                   </View>
 
                   <View style={styles.queueReadyBadge}>
-                    <Ionicons color="#F6C453" name="sparkles" size={14} />
                     <Text style={styles.queueReadyBadgeText}>Queue Ready</Text>
                   </View>
                 </View>
@@ -194,7 +193,6 @@ export default function PracticeAffirmationsScreen() {
               <View style={styles.emptyStateCard}>
                 <View style={styles.emptyStateTopRow}>
                   <View style={styles.emptyBadge}>
-                    <Ionicons color="#F6C453" name="sparkles" size={14} />
                     <Text style={styles.emptyBadgeText}>Today&apos;s Practice</Text>
                   </View>
                 </View>
