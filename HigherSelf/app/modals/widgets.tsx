@@ -12,9 +12,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Image as ExpoImage } from 'expo-image';
 import { router } from 'expo-router';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Pressable,
   ScrollView,
@@ -29,7 +30,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { THEMES, type ThemeItem } from '../../data/themes';
 
 type WidgetDetailScreen = 'home' | 'refresh' | 'theme' | 'topics';
-type WidgetPreviewKind = 'large' | 'medium' | 'small';
+type WidgetPreviewKind = 'medium';
 
 const REFRESH_OPTIONS: {
   description: string;
@@ -41,8 +42,6 @@ const REFRESH_OPTIONS: {
   { id: 'occasionally', label: 'Occasionally', description: '6 affirmations a day' },
   { id: 'daily', label: 'Affirmation of the day', description: '1 affirmation a day' },
 ];
-
-const PREVIEW_KINDS: WidgetPreviewKind[] = ['large', 'medium', 'small'];
 
 function getPreviewAffirmation(
   configuration: WidgetConfiguration,
@@ -139,13 +138,11 @@ function WidgetPreview({
   theme: ThemeItem;
 }) {
   const isMedium = kind === 'medium';
-  const isLarge = kind === 'large';
 
   return (
     <View
       style={[
         styles.widgetPreview,
-        isLarge && styles.widgetPreviewLarge,
         isMedium && styles.widgetPreviewMedium,
         showBorder && styles.widgetPreviewBorder,
       ]}
@@ -153,10 +150,9 @@ function WidgetPreview({
       <ExpoImage contentFit="cover" source={theme.image} style={StyleSheet.absoluteFillObject} transition={0} />
       <View style={[StyleSheet.absoluteFillObject, styles.widgetPreviewOverlay]} />
       <Text
-        numberOfLines={isMedium ? 2 : isLarge ? 4 : 5}
+        numberOfLines={2}
         style={[
           styles.widgetPreviewText,
-          isLarge && styles.widgetPreviewTextLarge,
           isMedium && styles.widgetPreviewTextMedium,
         ]}
       >
@@ -230,30 +226,39 @@ function FrequencyOption({
 export default function WidgetsScreen() {
   const { width } = useWindowDimensions();
   const previewViewportWidth = width - 40;
-  const previewListRef = useRef<FlatList<WidgetPreviewKind> | null>(null);
+  const previewListRef = useRef<FlatList<WidgetConfiguration> | null>(null);
   const { customAffirmations, loading } = useCustomAffirmations();
   const {
     activeWidgetId,
     createWidgetConfiguration,
+    deleteWidgetConfiguration,
     isLoaded,
+    selectWidgetConfiguration,
     updateWidgetConfiguration,
     widgetConfigurations,
   } = useWidgets();
   const [detailScreen, setDetailScreen] = useState<WidgetDetailScreen>('home');
-  const [previewIndex, setPreviewIndex] = useState(0);
 
   const activeWidget =
     widgetConfigurations.find((configuration) => configuration.id === activeWidgetId) ??
     widgetConfigurations[0];
+  const activeWidgetIndex = Math.max(
+    0,
+    widgetConfigurations.findIndex((configuration) => configuration.id === activeWidget?.id)
+  );
 
   const activeTheme = getThemeById(activeWidget?.themeId ?? THEMES[0].id);
-  const previewAffirmation = useMemo(
-    () =>
-      activeWidget
-        ? getPreviewAffirmation(activeWidget, customAffirmations)
-        : 'Your affirmations will appear here.',
-    [activeWidget, customAffirmations]
-  );
+
+  useEffect(() => {
+    if (detailScreen !== 'home') {
+      return;
+    }
+
+    previewListRef.current?.scrollToOffset({
+      animated: true,
+      offset: previewViewportWidth * activeWidgetIndex,
+    });
+  }, [activeWidgetIndex, detailScreen, previewViewportWidth]);
 
   const handleBack = () => {
     if (detailScreen !== 'home') {
@@ -262,6 +267,30 @@ export default function WidgetsScreen() {
     }
 
     router.back();
+  };
+
+  const handleDeleteWidget = () => {
+    if (!activeWidget) {
+      return;
+    }
+
+    if (widgetConfigurations.length <= 1) {
+      Alert.alert('Keep one widget', 'Create another widget before deleting this one.');
+      return;
+    }
+
+    Alert.alert(
+      'Delete widget?',
+      `${activeWidget.name} will be removed from this device.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteWidgetConfiguration(activeWidget.id),
+        },
+      ]
+    );
   };
 
   const renderHomeScreen = () => (
@@ -275,7 +304,7 @@ export default function WidgetsScreen() {
       <View style={styles.previewShell}>
         <FlatList
           ref={previewListRef}
-          data={PREVIEW_KINDS}
+          data={widgetConfigurations}
           decelerationRate="fast"
           disableIntervalMomentum
           getItemLayout={(_, index) => ({
@@ -289,20 +318,24 @@ export default function WidgetsScreen() {
           showsHorizontalScrollIndicator={false}
           snapToAlignment="start"
           style={styles.previewList}
-          keyExtractor={(item) => item}
+          keyExtractor={(item) => item.id}
           onMomentumScrollEnd={(event) => {
             const nextIndex = Math.round(
               event.nativeEvent.contentOffset.x / previewViewportWidth
             );
-            setPreviewIndex(nextIndex);
+            const nextWidget = widgetConfigurations[nextIndex];
+
+            if (nextWidget) {
+              selectWidgetConfiguration(nextWidget.id);
+            }
           }}
-          renderItem={({ item }: ListRenderItemInfo<WidgetPreviewKind>) => (
+          renderItem={({ item }: ListRenderItemInfo<WidgetConfiguration>) => (
             <DevicePreviewCard
-              affirmation={previewAffirmation}
-              kind={item}
+              affirmation={getPreviewAffirmation(item, customAffirmations)}
+              kind="medium"
               pageWidth={previewViewportWidth}
-              showBorder={activeWidget.showBorder}
-              theme={activeTheme}
+              showBorder={item.showBorder}
+              theme={getThemeById(item.themeId)}
             />
           )}
         />
@@ -313,10 +346,16 @@ export default function WidgetsScreen() {
       </Text>
 
       <View style={styles.pagination}>
-        {PREVIEW_KINDS.map((kind, index) => (
-          <View
-            key={kind}
-            style={[styles.paginationDot, index === previewIndex && styles.paginationDotActive]}
+        {widgetConfigurations.map((configuration, index) => (
+          <Pressable
+            key={configuration.id}
+            onPress={() => {
+              selectWidgetConfiguration(configuration.id);
+            }}
+            style={[
+              styles.paginationDot,
+              index === activeWidgetIndex && styles.paginationDotActive,
+            ]}
           />
         ))}
       </View>
@@ -396,12 +435,14 @@ export default function WidgetsScreen() {
         />
       </View>
 
-      <Pressable
-        onPress={createWidgetConfiguration}
-        style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
-      >
-        <Text style={styles.primaryButtonText}>Create new widget</Text>
-      </Pressable>
+      {widgetConfigurations.length > 1 ? (
+        <Pressable
+          onPress={handleDeleteWidget}
+          style={({ pressed }) => [styles.primaryButton, pressed && styles.buttonPressed]}
+        >
+          <Text style={styles.primaryButtonText}>Delete widget</Text>
+        </Pressable>
+      ) : null}
     </ScrollView>
   );
 
@@ -536,8 +577,6 @@ export default function WidgetsScreen() {
               icon="add"
               onPress={() => {
                 createWidgetConfiguration();
-                setPreviewIndex(0);
-                previewListRef.current?.scrollToOffset({ animated: false, offset: 0 });
                 setDetailScreen('home');
               }}
             />

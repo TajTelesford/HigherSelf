@@ -27,6 +27,7 @@ export type WidgetConfiguration = {
 type WidgetsContextType = {
   activeWidgetId: string;
   createWidgetConfiguration: () => void;
+  deleteWidgetConfiguration: (id: string) => void;
   isLoaded: boolean;
   selectWidgetConfiguration: (id: string) => void;
   updateWidgetConfiguration: (
@@ -185,6 +186,34 @@ export function WidgetsProvider({ children }: { children: React.ReactNode }) {
     setActiveWidgetId(nextConfigurationId);
   }, []);
 
+  const deleteWidgetConfiguration = useCallback((id: string) => {
+    setWidgetConfigurations((currentConfigurations) => {
+      if (currentConfigurations.length <= 1) {
+        return currentConfigurations;
+      }
+
+      const currentIndex = currentConfigurations.findIndex(
+        (configuration) => configuration.id === id
+      );
+      const nextConfigurations = currentConfigurations.filter(
+        (configuration) => configuration.id !== id
+      );
+
+      setActiveWidgetId((currentActiveWidgetId) => {
+        if (currentActiveWidgetId !== id) {
+          return currentActiveWidgetId;
+        }
+
+        const fallbackIndex =
+          currentIndex > 0 ? currentIndex - 1 : 0;
+
+        return nextConfigurations[fallbackIndex]?.id ?? nextConfigurations[0]?.id ?? '';
+      });
+
+      return nextConfigurations;
+    });
+  }, []);
+
   const selectWidgetConfiguration = useCallback((id: string) => {
     setActiveWidgetId(id);
   }, []);
@@ -193,6 +222,7 @@ export function WidgetsProvider({ children }: { children: React.ReactNode }) {
     () => ({
       activeWidgetId,
       createWidgetConfiguration,
+      deleteWidgetConfiguration,
       isLoaded,
       selectWidgetConfiguration,
       updateWidgetConfiguration,
@@ -201,6 +231,7 @@ export function WidgetsProvider({ children }: { children: React.ReactNode }) {
     [
       activeWidgetId,
       createWidgetConfiguration,
+      deleteWidgetConfiguration,
       isLoaded,
       selectWidgetConfiguration,
       updateWidgetConfiguration,
