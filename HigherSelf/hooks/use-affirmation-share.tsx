@@ -1,8 +1,8 @@
-import { useThemeSelection } from '@/context/ThemeContextProvider';
+import * as Sharing from 'expo-sharing';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Share, StyleSheet, View } from 'react-native';
-import * as Sharing from 'expo-sharing';
 import { captureRef } from 'react-native-view-shot';
+import { useThemeSelection } from '../context/ThemeContextProvider';
 
 import { AffirmationShareCard } from '@/components/AffirmationShareCard';
 
@@ -47,7 +47,7 @@ export function useAffirmationShare() {
       try {
         await waitForPaint();
 
-        const imageUri = await captureRef(shareCardRef.current, {
+        const imageUri = await captureRef(shareCardRef, {
           format: 'png',
           quality: 1,
           result: 'tmpfile',
