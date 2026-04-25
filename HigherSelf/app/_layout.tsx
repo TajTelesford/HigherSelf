@@ -82,6 +82,13 @@ export default function RootLayout() {
                         }}
                       />
                       <Stack.Screen
+                        name="modals/settings"
+                        options={{
+                          presentation: 'transparentModal',
+                          animation: 'slide_from_bottom',
+                        }}
+                      />
+                      <Stack.Screen
                         name="modals/reminders"
                         options={{
                           presentation: 'transparentModal',

@@ -1,12 +1,48 @@
-import { MyContentCardDisplay } from '@/components/MyContentCardDisplay';
-import { SettingsContentDisplay } from '@/components/SettingsContentDisplay';
+import { SettingsCardTile } from '@/components/SettingsCardTile';
 import { UnlockAllCardSection } from '@/components/UnlockAllCardSection';
-import { Ionicons } from '@expo/vector-icons';
+import { SHOW_EXPERIMENTAL_SETTINGS_CARDS } from '@/constants/settingsFeatures';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function LibraryScreen() {
+type SettingsCard = {
+  description: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  onPress: () => void;
+  title: string;
+};
+
+const PRIMARY_SETTINGS_CARDS: SettingsCard[] = [
+  {
+    title: 'Reminders',
+    description: 'Choose when HigherSelf checks in with gentle reminder notifications.',
+    icon: 'bell-ring-outline',
+    onPress: () => router.push('/modals/reminders'),
+  },
+];
+
+const EXPERIMENTAL_SETTINGS_CARDS: SettingsCard[] = [
+  {
+    title: 'App icon',
+    description: 'Test alternate app icon styles before exposing them in production.',
+    icon: 'shape-outline',
+    onPress: () => router.push('/modals/app-icon'),
+  },
+  {
+    title: 'Widgets',
+    description: 'Open the widget configuration tools while this feature is still hidden.',
+    icon: 'tablet-dashboard',
+    onPress: () => router.push('/modals/widgets'),
+  },
+];
+
+export default function SettingsScreen() {
+  const settingsCards = SHOW_EXPERIMENTAL_SETTINGS_CARDS
+    ? [...PRIMARY_SETTINGS_CARDS, ...EXPERIMENTAL_SETTINGS_CARDS]
+    : PRIMARY_SETTINGS_CARDS;
+
   return (
     <View style={styles.backdrop}>
       <Pressable style={styles.dismissArea} onPress={() => router.back()} />
@@ -15,7 +51,7 @@ export default function LibraryScreen() {
         <View style={styles.handle} />
 
         <View style={styles.header}>
-          <Text style={styles.title}>Library</Text>
+          <Text style={styles.title}>Settings</Text>
 
           <Pressable onPress={() => router.back()} style={styles.closeButton}>
             <Ionicons color="#F5F7FA" name="close" size={22} />
@@ -29,20 +65,21 @@ export default function LibraryScreen() {
         >
           <View style={styles.heroCard}>
             <View style={styles.heroIconWrap}>
-              <Ionicons color="#F4C95D" name="library-outline" size={28} />
+              <Ionicons color="#F4C95D" name="settings-outline" size={28} />
             </View>
 
-            <Text style={styles.heroTitle}>Your saved space</Text>
+            <Text style={styles.heroTitle}>Control the experience</Text>
             <Text style={styles.heroCopy}>
-              Keep your favorite affirmations, folders, personal affirmations, and
-              recordings all in one place.
+              Manage reminders and, when enabled for testing, access advanced customization tools.
             </Text>
           </View>
 
-          <Text style={styles.sectionTitle}>My Content</Text>
-          <MyContentCardDisplay />
+          <Text style={styles.sectionTitle}>Preferences</Text>
 
-          <SettingsContentDisplay text="Open settings to manage reminders and any advanced tools you enable for testing." />
+          {settingsCards.map((card) => (
+            <SettingsCardTile key={card.title} {...card} />
+          ))}
+
           <UnlockAllCardSection text="Access all topics, affirmations, themes, and remove ads!" />
         </ScrollView>
       </SafeAreaView>
@@ -137,6 +174,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     marginTop: 8,
-    marginBottom: 2,
+    marginBottom: 12,
   },
 });
