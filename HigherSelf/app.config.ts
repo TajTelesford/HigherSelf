@@ -7,6 +7,10 @@ const APP_ICON_PLUGIN_OPTIONS = [
     id: 'HigherSelfGlow',
     assetPath: './assets/Logos/Glow.png',
   },
+  {
+    id: 'HigherSelfGlowBlack',
+    assetPath: './assets/Logos/Glow_Black.png',
+  },
 ] as const;
 
 const baseConfig = appJson.expo;
