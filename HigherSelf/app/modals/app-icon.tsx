@@ -16,8 +16,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { STORAGE_KEYS } from '@/data/HigherSelf_StorageKeys';
-import { APP_ICON_OPTIONS, DEFAULT_APP_ICON_ID } from '@/data/appIcons';
+import { STORAGE_KEYS } from '../../data/HigherSelf_StorageKeys';
+import { APP_ICON_OPTIONS, DEFAULT_APP_ICON_ID } from '../../data/appIcons';
 
 type DynamicAppIconModule = {
   getAppIcon(): string;
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 2,
   },
   
   

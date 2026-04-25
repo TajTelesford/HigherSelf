@@ -5,13 +5,16 @@ const appJson = require('./app.json') as { expo: ExpoConfig };
 const APP_ICON_PLUGIN_OPTIONS = [
   {
     id: 'HigherSelfGlow',
-    assetPath: './assets/Logos/Untitled design.png',
+    assetPath: './assets/Logos/Glow.png',
+  },
+  {
+    id: 'HigherSelfGlowBlack',
+    assetPath: './assets/Logos/Glow_Black.png',
   },
 ] as const;
 
 const baseConfig = appJson.expo;
-const defaultIconPath =
-  APP_ICON_PLUGIN_OPTIONS[0]?.assetPath ?? './assets/Logos/Untitled design.png';
+const defaultIconPath = APP_ICON_PLUGIN_OPTIONS[0]?.assetPath ?? './assets/Logos/Glow.png';
 
 const dynamicIconPluginConfig = Object.fromEntries(
   APP_ICON_PLUGIN_OPTIONS.map((icon) => [
@@ -39,8 +42,9 @@ const config: ExpoConfig = {
   icon: defaultIconPath,
   ios: {
     ...baseConfig.ios,
+    deploymentTarget: '15.1',
     icon: defaultIconPath,
-  },
+  } as ExpoConfig['ios'],
   android: {
     ...baseConfig.android,
     icon: defaultIconPath,
